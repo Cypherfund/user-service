@@ -1,9 +1,9 @@
 package com.cypherfund.campaign.user.security;
 
 import com.cypherfund.campaign.user.security.oauth2.CustomOAuth2UserService;
-import com.cypherfund.campaign.user.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
-import com.cypherfund.campaign.user.security.oauth2.OAuth2AuthenticationFailureHandler;
-import com.cypherfund.campaign.user.security.oauth2.OAuth2AuthenticationSuccessHandler;
+//import com.cypherfund.campaign.user.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+//import com.cypherfund.campaign.user.security.oauth2.OAuth2AuthenticationFailureHandler;
+//import com.cypherfund.campaign.user.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,15 +29,15 @@ public class SecurityConfig {
     CustomUserDetailsService customUserDetailsService;
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
+//
+//    @Autowired
+//    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
-    @Autowired
-    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-    @Autowired
-    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
-
-    @Autowired
-    private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+//    @Autowired
+//    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
+//
+//    @Autowired
+//    private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
 
     @Autowired
@@ -71,10 +71,10 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
-    @Bean
-    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
-        return new HttpCookieOAuth2AuthorizationRequestRepository();
-    }
+//    @Bean
+//    public HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository() {
+//        return new HttpCookieOAuth2AuthorizationRequestRepository();
+//    }
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
@@ -107,18 +107,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, permittedGets).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(Oauth2 -> Oauth2
-                        .authorizationEndpoint(authEndppoint -> authEndppoint
-                                .baseUri("/oauth2/authorize")
-                                .authorizationRequestRepository(cookieAuthorizationRequestRepository())
-                        )
-                        .redirectionEndpoint(redirectEndpoint -> redirectEndpoint
-                                .baseUri("/oauth2/callback/*")
-                        )
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService))
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        .failureHandler(oAuth2AuthenticationFailureHandler)
-                )
+//                .oauth2Login(Oauth2 -> Oauth2
+//                        .authorizationEndpoint(authEndppoint -> authEndppoint
+//                                .baseUri("/oauth2/authorize")
+//                                .authorizationRequestRepository(cookieAuthorizationRequestRepository())
+//                        )
+//                        .redirectionEndpoint(redirectEndpoint -> redirectEndpoint
+//                                .baseUri("/oauth2/callback/*")
+//                        )
+//                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService))
+//                        .successHandler(oAuth2AuthenticationSuccessHandler)
+//                        .failureHandler(oAuth2AuthenticationFailureHandler)
+//                )
                 .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
                         .authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

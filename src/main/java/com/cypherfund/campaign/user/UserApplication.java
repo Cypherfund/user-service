@@ -12,7 +12,8 @@ import org.springframework.context.annotation.ComponentScan;
 		"com.cypherfund.campaign.api.model",
 		"com.cypherfund.campaign.api.exceptions",
 		"com.cypherfund.campaign.api.configs",
-		"com.cypherfund.campaign.api.user"
+		"com.cypherfund.campaign.api.user",
+		"com.cypherfund.campaign.util.configs"
 })
 public class UserApplication {
 
