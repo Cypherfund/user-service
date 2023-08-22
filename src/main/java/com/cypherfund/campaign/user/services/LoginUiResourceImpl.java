@@ -14,6 +14,7 @@ import com.cypherfund.campaign.api.user.model.LoginRequest;
 import com.cypherfund.campaign.api.user.model.SignUpRequest;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import com.cypherfund.campaign.api.user.ui.LoginUiResource;
+import com.cypherfund.campaign.user.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +65,7 @@ public class LoginUiResourceImpl implements LoginUiResource {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt, ((UserPrincipal) authentication.getPrincipal()).getId()));
     }
 
     @Override
