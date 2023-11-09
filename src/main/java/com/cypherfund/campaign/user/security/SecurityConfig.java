@@ -58,6 +58,7 @@ public class SecurityConfig {
     };
     private final String[] permittedGets = new String[]{
             "/users/*",
+            "/users/id/*",
             "/users/valid/*"
     };
     private final String[] webJarIgore = new String[]{

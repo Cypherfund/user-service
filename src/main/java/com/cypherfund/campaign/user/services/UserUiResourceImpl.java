@@ -1,11 +1,11 @@
 package com.cypherfund.campaign.user.services;
 
-import com.cypherfund.campaign.api.exceptions.NotFoundException;
-import com.cypherfund.campaign.api.model.ApiResponse;
+import com.cypherfund.campaign.user.controller.UserUiResource;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
-import com.cypherfund.campaign.api.user.ui.UserUiResource;
+import com.cypherfund.campaign.user.exceptions.NotFoundException;
+import com.cypherfund.campaign.user.model.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +27,14 @@ public class UserUiResourceImpl implements UserUiResource {
                 .map(this::mapToUserDto)
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>(true, "", users));
+    }
+
+    @Override
+    public ResponseEntity<?> getUserbyID(String id) {
+        Enumerations.TUserDto userDto = userRepository.findById(id)
+                .map(this::mapToUserDto)
+                .orElseThrow(() -> new NotFoundException("user not found"));
+        return  ResponseEntity.ok(new ApiResponse<>(true, "", userDto));
     }
 
     @Override

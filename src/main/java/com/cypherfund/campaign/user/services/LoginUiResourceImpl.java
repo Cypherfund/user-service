@@ -1,7 +1,6 @@
 package com.cypherfund.campaign.user.services;
 
-import com.cypherfund.campaign.api.exceptions.AppException;
-import com.cypherfund.campaign.api.model.ApiResponse;
+import com.cypherfund.campaign.user.controller.LoginUiResource;
 import com.cypherfund.campaign.user.dal.entity.TRole;
 import com.cypherfund.campaign.user.dal.entity.TRoleUser;
 import com.cypherfund.campaign.user.dal.entity.TRoleUserRepository;
@@ -9,11 +8,12 @@ import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TRoleRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
-import com.cypherfund.campaign.api.user.model.JwtAuthenticationResponse;
-import com.cypherfund.campaign.api.user.model.LoginRequest;
-import com.cypherfund.campaign.api.user.model.SignUpRequest;
+import com.cypherfund.campaign.user.exceptions.AppException;
+import com.cypherfund.campaign.user.model.ApiResponse;
+import com.cypherfund.campaign.user.model.JwtAuthenticationResponse;
+import com.cypherfund.campaign.user.model.LoginRequest;
+import com.cypherfund.campaign.user.model.SignUpRequest;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
-import com.cypherfund.campaign.api.user.ui.LoginUiResource;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
