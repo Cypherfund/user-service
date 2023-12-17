@@ -10,7 +10,7 @@ jobs:
       - checkout
       - run:
           name: Code Verification
-          command: mvn verify -DskipTests
+          command: ./mvnw verify -DskipTests
 
   test:
     docker:
