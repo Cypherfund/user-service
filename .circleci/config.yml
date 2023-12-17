@@ -39,6 +39,11 @@ jobs:
           docker-username: REGISTRY_USER
           registry: ${DOCKER_REGISTRY}
       - run:
+          name: Start mysql test db
+          command: |
+            docker images
+            docker run -d --name test-db -e MYSQL_ROOT_PASSWORD=testroot -e MYSQL_DATABASE=user-test -p 3306:3306 mysql:latest
+      - run:
           name: Build Image
           command: |
             ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}/${REGISTRY_USER}/user-service:<< pipeline.number >>_${CIRCLE_SHA1}
