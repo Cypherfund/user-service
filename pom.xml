@@ -6,6 +6,7 @@
         <groupId>com.cypherfund.campaign</groupId>
         <artifactId>campaign</artifactId>
         <version>1.0.1-SNAPSHOT</version>
+        <relativePath>./.mvn/pom.xml</relativePath>
     </parent>
 
     <artifactId>user</artifactId>

@@ -1,0 +1,51 @@
+version: 2.1
+orbs:
+  docker: circleci/docker@2.4.0
+
+jobs:
+  verify:
+    docker:
+      - image: oracle/graalvm-ce:17
+    steps:
+      - checkout
+      - run:
+          name: Code Verification
+          command: mvn verify -DskipTests
+
+  test:
+    docker:
+      - image: oracle/graalvm-ce:17
+    steps:
+      - checkout
+      - run:
+          name: Run Unit Tests
+          command: ./mvnw test
+
+  build_and_push_image:
+    executor: docker/docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check:
+          docker-password: REGISTRY_PASSWORD
+          docker-username: REGISTRY_USER
+          registry: ${DOCKER_REGISTRY}
+      - run:
+          name: Build Image
+          command: |
+            ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}/${REGISTRY_USER}/user-service:<< pipeline.number >>_${CIRCLE_SHA1}
+      - docker/push:
+          image: ${REGISTRY_USER}/user-service
+          tag: << pipeline.number >>_${CIRCLE_SHA1}
+          registry: ${DOCKER_REGISTRY}
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - verify
+      - test
+      - build_and_push_image:
+          requires:
+            - test
+            - verify
