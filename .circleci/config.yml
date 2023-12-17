@@ -33,7 +33,7 @@ jobs:
       image: ubuntu-2204:2022.04.2
     steps:
       - checkout
-      - setup_remote_docker
+#      - setup_remote_docker
       - docker/check:
           docker-password: REGISTRY_PASSWORD
           docker-username: REGISTRY_USER
