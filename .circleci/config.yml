@@ -20,7 +20,9 @@ jobs:
       - setup_remote_docker
       - run:
           name: Start mysql test db
-          command: docker run -d --name test-db -e MYSQL_ROOT_PASSWORD=testroot -p 3306:3306 mysql:latest
+          command: |
+            docker images
+            docker run -d --name test-db -e MYSQL_ROOT_PASSWORD=testroot -p 3306:3306 mysql:latest
       - run:
           name: Run Unit Tests
           command: ./mvnw test
