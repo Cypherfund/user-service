@@ -57,6 +57,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints: [ "e7:30:c8:03:44:92:e9:c3:54:df:ec:5c:9c:df:85:15" ]
+      - checkout    
       - run:
           name: checkout helm chart repository
           command: |
