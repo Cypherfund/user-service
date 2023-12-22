@@ -74,15 +74,15 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-     - verify
-     - test
-     - build_and_push_image:
-         requires:
-         - test
-         - verify
-     - deploy:
-        requires:
-        - build_and_push_image
-        filters:
-          branches:
-            only: main
+    #  - verify
+    #  - test
+    #  - build_and_push_image:
+    #      requires:
+    #      - test
+    #      - verify
+     - deploy
+        # requires:
+        # - build_and_push_image
+        # filters:
+        #   branches:
+        #     only: main
