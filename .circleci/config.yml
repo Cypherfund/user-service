@@ -66,22 +66,36 @@ jobs:
           name: update values file
           command: |
               cd helm-charts
-              sed -i "s/tag:.*/tag: ${CIRCLE_SHA1}/g" tech-ascend-charts/user-service/values.yaml
+              sed -i "s/tag:.*/tag: << pipeline.number >>_${CIRCLE_SHA1}/g" tech-ascend-charts/user-service/values.yaml
               cat tech-ascend-charts/user-service/values.yaml
+              git add tech-ascend-charts/user-service/values.yaml
+              git commit -m "update user-service image tag to << pipeline.number >>_${CIRCLE_SHA1}"
+              git push origin main
+
+#      - run:
+#          name: Deploy to DigitalOcean
+#          command: |
+#              cd helm-charts
+#              helm repo add tech-ascend https://cypherfund.github.io/helm-charts/
+#              helm repo update
+#              helm upgrade --install user-service tech-ascend/user-service --namespace tech-ascend --create-namespace --values tech-ascend-charts/user-service/values.yaml
 
 workflows:
   version: 2
   build_and_deploy:
     jobs:
-     - verify
-     - test
-     - build_and_push_image:
+      - verify
+      - test
+      - build_and_push_image:
+          requires:
+          - test
+          - verify
+      - deploy:
          requires:
-         - test
-         - verify
-     - deploy:
-        requires:
-        - build_and_push_image
-        filters:
-          branches:
-            only: main
+         - build_and_push_image
+         filters:
+           branches:
+             only:
+             - main
+             - dev
+             - staging
