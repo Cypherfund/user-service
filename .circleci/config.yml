@@ -56,7 +56,7 @@ jobs:
       image: ubuntu-2204:2022.04.2
     steps:
       - add_ssh_keys:
-          fingerprints: [ "e7:30:c8:03:44:92:e9:c3:54:df:ec:5c:9c:df:85:15" ]
+          fingerprints: ["9b:c3:18:8c:43:0e:5e:1e:05:73:e4:5c:57:84:ec:99"]
       - checkout    
       - run:
           name: checkout helm chart repository
