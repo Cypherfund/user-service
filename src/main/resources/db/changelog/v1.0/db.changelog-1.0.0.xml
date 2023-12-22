@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        context="prod">
+    <changeSet id="initialise db" author="Ngai Elizabeth">
+        <sqlFile dbms="mysql"
+                 endDelimiter=";"
+                 path="sql/db-init.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="insert-initial-jwt-encryption-key" author="Ngai Elizabeth">
+        <insert tableName="t_paramters">
+            <column name="str_key" value="JWT_ENCRYPTION_KEY"/>
+            <column name="str_value" value="2021@Ad"/>
+            <column name="str_description" value="key used to sign jwt tokens."/>
+            <column name="b_status" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-token-expiration-time" author="Ngai Elizabeth">
+        <insert tableName="t_paramters">
+            <column name="str_key" value="JWT_TOKEN_EXPIRATION_TIME"/>
+            <column name="str_value" value="1800000"/>
+            <column name="str_description" value="time for bearer token to expire in milliseconds"/>
+            <column name="b_status" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-role-customer" author="Ngai Elizabeth">
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="CUSTOMER"/>
+            <column name="str_role_description" value="customers of the system who pay for services"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+    </changeSet>
+    <changeSet id="insert-country-code-cameroon" author="Ngai Elizabeth">
+        <insert tableName="t_country_codes">
+            <column name="KEY_COUNTRY_CODE" value="237"/>
+            <column name="str_country_name" value="CAMEROON"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
+

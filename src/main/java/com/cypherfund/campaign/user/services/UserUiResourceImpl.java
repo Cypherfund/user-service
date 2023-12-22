@@ -53,6 +53,11 @@ public class UserUiResourceImpl implements UserUiResource {
         return  ResponseEntity.ok(new ApiResponse<>(true, "", ""));
     }
 
+    @Override
+    public ResponseEntity<?> validateToken(String token) {
+        return null;
+    }
+
     private Enumerations.TUserDto mapToUserDto(TUser user) {
         return new Enumerations.TUserDto(
                 user.getUserId(),

@@ -18,4 +18,7 @@ public interface UserUiResource {
 
     @GetMapping("/valid/{username}")
     ResponseEntity<?> validUsername(@PathVariable String username);
+
+    @GetMapping("/validate-token/{token}")
+    ResponseEntity<?> validateToken(@PathVariable String token);
 }
