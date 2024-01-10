@@ -27,14 +27,6 @@
         </insert>
     </changeSet>
 
-    <changeSet id="insert-role-customer" author="Ngai Elizabeth">
-        <insert tableName="t_role">
-            <column name="lg_role_id" value="CUSTOMER"/>
-            <column name="str_role_description" value="customers of the system who pay for services"/>
-            <column name="b_active" valueNumeric="1"/>
-            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
-        </insert>
-    </changeSet>
     <changeSet id="insert-country-code-cameroon" author="Ngai Elizabeth">
         <insert tableName="t_country_codes">
             <column name="KEY_COUNTRY_CODE" value="237"/>
@@ -80,13 +72,16 @@
         </insert>
         <insert tableName="t_role">
             <column name="lg_role_id" value="TALENT"/>
-            <column name="str_role_description" value="individual with a particular digital skills wishing to find work"/>
+            <column name="str_role_description" value="individual wishing to find work"/>
             <column name="b_active" valueNumeric="1"/>
             <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
         </insert>
     </changeSet>
     <changeSet id="add-test-users" author="Ngai Elizabeth" context="test">
         <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_users.sql" relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="add-test-roles" author="Ngai Elizabeth">
+        <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_role_user.sql" relativeToChangelogFile="true"/>
     </changeSet>
 </databaseChangeLog>
 

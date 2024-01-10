@@ -48,10 +48,11 @@ public class SecurityConfig {
     private final String[] permittedResources = new String[]{"/favicon.ico"};
     private final String[] permittedApis = new String[]{
             "/campaign-service/campaigns",
-            "/user-service/checkUsernameAvailability",
+            "/users/validate-token",
             "/signup",
             "/signin",
             "/oauth2/**",
+            "/validate-token",
             "/actuator",
             "/actuator/**",
 

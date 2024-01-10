@@ -1,6 +1,7 @@
 package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.controller.UserUiResource;
+import com.cypherfund.campaign.user.dal.entity.TRoleUser;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
@@ -65,6 +66,8 @@ public class UserUiResourceImpl implements UserUiResource {
     }
 
     private TUserDto mapToUserDto(TUser user) {
-        return new ModelMapper().map(user, TUserDto.class);
+        TUserDto userDto = new ModelMapper().map(user, TUserDto.class);
+        userDto.setRoles(user.getLgRole().stream().map(tRoleUser -> tRoleUser.getLgRole().getLgRoleId()).toList());
+        return userDto;
     }
 }

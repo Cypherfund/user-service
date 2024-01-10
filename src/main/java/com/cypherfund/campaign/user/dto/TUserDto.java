@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 
@@ -15,8 +16,7 @@ import java.util.List;
 /**
  * DTO for {@link com.cypherfund.campaign.user.dal.entity.TUser}
  */
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TUserDto implements Serializable {
     @Size(max = 50)
@@ -37,7 +37,7 @@ public class TUserDto implements Serializable {
     Instant dtUpdated;
     @Size(max = 40)
     String email;
-    List<TRole> lgRoleLgRoles;
+    List<String> roles;
     @Size(max = 15)
     String strLoginProvider;
 }
