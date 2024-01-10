@@ -32,12 +32,13 @@ public class JwtTokenProvider {
     }
 
     public String getUserIdFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(appProperties.getAuth().getTokenSecret())
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+        if (validateToken(token)){
+            Claims claims = Jwts.parser()
+                    .setSigningKey(appProperties.getAuth().getTokenSecret())
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } else return "";
     }
 
     public boolean validateToken(String authToken) {
