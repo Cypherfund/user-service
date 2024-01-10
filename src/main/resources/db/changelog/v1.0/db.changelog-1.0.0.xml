@@ -41,5 +41,52 @@
             <column name="str_country_name" value="CAMEROON"/>
         </insert>
     </changeSet>
+    <changeSet id="insert-role" author="Ngai Elizabeth">
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="CUSTOMER"/>
+            <column name="str_role_description" value="customers of the system who pay for services"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="ADMIN"/>
+            <column name="str_role_description" value="administrators of the system"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="SUPER_ADMIN"/>
+            <column name="str_role_description" value="super administrators of the system"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="STUDENT"/>
+            <column name="str_role_description" value="students enrolled in courses"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="TUTOR"/>
+            <column name="str_role_description" value="tutors who teach courses"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="CLIENT"/>
+            <column name="str_role_description" value="partners in search of talents"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+        <insert tableName="t_role">
+            <column name="lg_role_id" value="TALENT"/>
+            <column name="str_role_description" value="individual with a particular digital skills wishing to find work"/>
+            <column name="b_active" valueNumeric="1"/>
+            <column name="dt_created" valueDate="2023-06-10 14:25:15"/>
+        </insert>
+    </changeSet>
+    <changeSet id="add-test-users" author="Ngai Elizabeth" context="test">
+        <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_users.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>
 

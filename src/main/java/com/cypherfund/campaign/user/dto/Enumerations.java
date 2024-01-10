@@ -16,10 +16,4 @@ public class Enumerations {
         google,
         github
     }
-    /**
-     * DTO for {@link TUser}
-     */
-    public static record TUserDto(String userId, String name, String username, String phone, String status, Instant dtCreated,
-                                  String email) implements Serializable {
-    }
 }
