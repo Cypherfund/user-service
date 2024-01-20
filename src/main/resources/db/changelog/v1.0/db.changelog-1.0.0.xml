@@ -4,9 +4,6 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
         context="prod">
-    <changeSet id="update changelog table to have primary key" author="Ngai Elizabeth" context="dbms">
-        <addPrimaryKey tableName="databasechangelog" columnNames="ID,AUTHOR" constraintName="primary_key_constraint"/>
-    </changeSet>
     <changeSet id="initialise db" author="Ngai Elizabeth">
         <sqlFile dbms="mysql"
                  endDelimiter=";"
@@ -83,7 +80,7 @@
     <changeSet id="add-test-users" author="Ngai Elizabeth" context="test">
         <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_users.sql" relativeToChangelogFile="true"/>
     </changeSet>
-    <changeSet id="add-test-roles" author="Ngai Elizabeth">
+    <changeSet id="add-test-roles" author="Ngai Elizabeth" context="test">
         <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_role_user.sql" relativeToChangelogFile="true"/>
     </changeSet>
 </databaseChangeLog>
