@@ -27,8 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import static com.cypherfund.campaign.user.dto.Enumerations.USER_ROLES.areAllRolesPresent;
 
 @RestController
 public class LoginUiResourceImpl implements LoginUiResource {
@@ -96,15 +100,27 @@ public class LoginUiResourceImpl implements LoginUiResource {
         user.setDtCreated(new Date().toInstant());
         user.setStatus(Enumerations.USER_STATUS.active.name());
         user.setStrLoginProvider(Enumerations.AUTH_PRIVIDERS.local.name());
-        TRole userRole = roleRepository.findById(Enumerations.USER_ROLES.CUSTOMER.name())
-                .orElseThrow(() -> new AppException("CUSTOMER Role not set."));
 
-        TRoleUser tRoleUser = new TRoleUser();
-        tRoleUser.setUser(user);
-        tRoleUser.setLgRole(userRole);
+        boolean allRolesPresent = areAllRolesPresent(signUpRequest.getRoles());
+
+        if (!allRolesPresent) {
+            throw new AppException("Invalid role not set.");
+        }
+
+        List<TRoleUser> tRoleUsers = new ArrayList<>();
+        for (String role :
+                signUpRequest.getRoles()) {
+            TRole userRole = roleRepository.findById(role.toUpperCase())
+                    .orElseThrow(() -> new AppException( role.toUpperCase() + " Role not set."));
+            TRoleUser tRoleUser = new TRoleUser();
+            tRoleUser.setUser(user);
+            tRoleUser.setLgRole(userRole);
+            tRoleUsers.add(tRoleUser);
+        }
+
 
         TUser result = userRepository.save(user);
-        tRoleUserRepository.save(tRoleUser);
+        tRoleUserRepository.saveAll(tRoleUsers);
 
 
         URI location = ServletUriComponentsBuilder

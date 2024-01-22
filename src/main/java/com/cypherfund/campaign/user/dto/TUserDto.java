@@ -28,9 +28,6 @@ public class TUserDto implements Serializable {
     String username;
     @Size(max = 15)
     String phone;
-    @NotNull
-    @Size(max = 255)
-    String password;
     @Size(max = 15)
     String status;
     Instant dtCreated;
