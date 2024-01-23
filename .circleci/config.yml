@@ -83,6 +83,7 @@ jobs:
       - run:
           name: update build
           command: |
+           ls
            cd helm-charts
            git commit -m "update user-service image tag to << pipeline.number >>_${CIRCLE_SHA1}"
            git push origin main
