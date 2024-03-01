@@ -12,7 +12,7 @@ import java.util.List;
 
 @Data
 public class SignUpRequest {
-    @NotBlank
+//    @NotBlank
     @Size(min = 4, max = 40)
     private String name;
 
@@ -25,15 +25,15 @@ public class SignUpRequest {
     @Email
     private String email;
 
-    @Pattern(regexp="^(\\+\\d{3})\\d{5,16}$", message="incorrect phone number: expected format is +xxx xxxxx")
+//    @Pattern(regexp="^(\\+\\d{3})\\d{5,16}$", message="incorrect phone number: expected format is +xxx xxxxx")
     @Size(max = 20)
     private String phone;
-    @NotBlank
-    @Size(min = 6, max = 20, message = "password invalid")
+//    @NotBlank
+//    @Size(min = 6, max = 20, message = "password invalid")
     private String password;
 
-    @NotNull
-    @NotEmpty(message="assign at least one role to the user")
+//    @NotNull
+//    @NotEmpty(message="assign at least one role to the user")
     private List<String> roles;
 
 }
