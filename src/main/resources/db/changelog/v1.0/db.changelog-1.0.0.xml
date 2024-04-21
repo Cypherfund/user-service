@@ -83,5 +83,10 @@
     <changeSet id="add-test-roles" author="Ngai Elizabeth" context="test">
         <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_role_user.sql" relativeToChangelogFile="true"/>
     </changeSet>
+    <changeSet id="update password of DoeElizabeth" author="Ngai Elizabeth" dbms="mysql">
+        <sql>
+            update t_users set password = '$2y$10$IkKnSqh4dxSY.kNgZ7u5RelXrvAv6BEG2H/o506aHfRDfrM9gR7Qq' where username = 'DoeElizabeth';
+        </sql>
+    </changeSet>
 </databaseChangeLog>
 

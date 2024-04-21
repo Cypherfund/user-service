@@ -5,10 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {
-		"com.cypherfund.campaign.user",
-		"com.cypherfund.campaign.util.configs"
-})
 public class UserApplication {
 
 	public static void main(String[] args) {
