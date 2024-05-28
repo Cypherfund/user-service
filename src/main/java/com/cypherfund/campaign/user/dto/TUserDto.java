@@ -19,6 +19,8 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TUserDto implements Serializable {
+    @Size(max = 100)
+    private String imgUrl;
     @Size(max = 50)
     String userId;
     @Size(max = 255)

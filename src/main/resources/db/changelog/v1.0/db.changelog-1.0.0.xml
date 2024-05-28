@@ -83,10 +83,22 @@
     <changeSet id="add-test-roles" author="Ngai Elizabeth" context="test">
         <sqlFile dbms="mysql" endDelimiter=";" path="sql/t_role_user.sql" relativeToChangelogFile="true"/>
     </changeSet>
-    <changeSet id="update password of DoeElizabeth" author="Ngai Elizabeth" dbms="mysql">
+    <changeSet id="update password of DoeElizabeth" author="Ngai Elizabeth" dbms="mysql" context="test">
         <sql>
             update t_users set password = '$2y$10$IkKnSqh4dxSY.kNgZ7u5RelXrvAv6BEG2H/o506aHfRDfrM9gR7Qq' where username = 'DoeElizabeth';
         </sql>
+    </changeSet>
+
+    <changeSet id="add-img-url-to-t-users" author="Ngai Elizabeth">
+        <addColumn tableName="t_users">
+            <column name="img_url" type="varchar(100)" defaultValue=""/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="add images to uses only on test" author="Ngai Elizabeth" context="test">
+        <update tableName="t_users">
+            <column name="img_url" value="instructor.jpeg"/>
+            <where>img_url = ''</where>
+        </update>
     </changeSet>
 </databaseChangeLog>
 
