@@ -62,6 +62,8 @@ public class AccountService {
         TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId)
                 .orElseThrow(() -> new AppException("Account balance not found"));
 
+        if (accountBalance.getDWinBalance().compareTo(BigDecimal.valueOf(amount)) < 0)
+            throw new AppException("Insufficient balance");
         accountBalance.setDWinBalance(accountBalance.getDWinBalance().subtract(BigDecimal.valueOf(amount)));
 
         tAccountBalanceRepository.save(accountBalance);
@@ -70,24 +72,19 @@ public class AccountService {
     }
 
     @Transactional
-    public void creditBalance(String userId, double amount, String reference) {
+    public TAccountBalanceDto depositCurrentAccount(String userId, double amount, String reference) {
         log.info("Crediting balance for user: {}", userId);
 
         TUser user = tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
-        TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId).orElseGet(() -> {
-            TAccountBalance newAccountBalance = new TAccountBalance();
-            newAccountBalance.setLgUserId(userId);
-            newAccountBalance.setDCurBalance(BigDecimal.ZERO);
-            newAccountBalance.setDWinBalance(BigDecimal.ZERO);
-            newAccountBalance.setDtCreated(Instant.now());
-            return tAccountBalanceRepository.save(newAccountBalance);
-        });
+        TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId).orElseGet(() -> createNewAccount(userId));
 
         accountBalance.setDCurBalance(accountBalance.getDCurBalance().add(BigDecimal.valueOf(amount)));
 
-        tAccountBalanceRepository.save(accountBalance);
+        accountBalance = tAccountBalanceRepository.save(accountBalance);
 
         createTransaction(userId, Enumerations.TRANSACTION_TYPE.DEPOSIT, amount, reference);
+
+        return modelMapper.map(accountBalance, TAccountBalanceDto.class);
     }
 
     @Transactional
@@ -97,6 +94,9 @@ public class AccountService {
         TUser user = tUserRepository.findById(debitRequest.getUserId()).orElseThrow(() -> new AppException("User not found"));
         TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(debitRequest.getUserId())
                 .orElseThrow(() -> new AppException("Account balance not found"));
+
+        if (accountBalance.getDCurBalance().compareTo(BigDecimal.valueOf(debitRequest.getAmount())) < 0)
+            throw new AppException("Insufficient balance");
 
         accountBalance.setDCurBalance(accountBalance.getDCurBalance().subtract(BigDecimal.valueOf(debitRequest.getAmount())));
 
@@ -124,9 +124,19 @@ public class AccountService {
         log.info("Retrieving balance for user: {}", userId);
 
         TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId)
-                .orElseThrow(() -> new AppException("Account balance not found"));
+                .orElseGet(() -> createNewAccount(userId));
 
         return modelMapper.map(accountBalance, TAccountBalanceDto.class);
+    }
+
+    private TAccountBalance createNewAccount(String userId) {
+        TAccountBalance newAccountBalance = new TAccountBalance();
+        newAccountBalance.setLgUserId(userId);
+        newAccountBalance.setDCurBalance(BigDecimal.ZERO);
+        newAccountBalance.setDWinBalance(BigDecimal.ZERO);
+        newAccountBalance.setDtCreated(Instant.now());
+        newAccountBalance.setDtUpdated(Instant.now());
+        return tAccountBalanceRepository.save(newAccountBalance);
     }
 
     public List<Transaction> getTransactions(String userId) {

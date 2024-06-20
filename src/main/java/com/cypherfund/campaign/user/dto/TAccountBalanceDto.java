@@ -2,6 +2,7 @@ package com.cypherfund.campaign.user.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.time.Instant;
 /**
  * DTO for {@link com.cypherfund.campaign.user.dal.entity.TAccountBalance}
  */
-@Value
+@Data
 public class TAccountBalanceDto implements Serializable {
     Long id;
     @NotNull

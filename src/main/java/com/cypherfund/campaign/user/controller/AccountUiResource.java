@@ -20,7 +20,7 @@ public class AccountUiResource {
     @Autowired
     AccountService accountService;
 
-    @PostMapping("/credit-winning")
+    @PostMapping("/winning")
     public ResponseEntity<ApiResponse<String>> creditWinning(@RequestParam("amount") double amount,
                               @RequestParam("userId") String userId,
                               @RequestParam("reference") String reference) {
@@ -36,13 +36,12 @@ public class AccountUiResource {
         return ResponseEntity.ok(ApiResponse.success("Play debited successfully", null));
     }
 
-    @PostMapping("/credit")
-    public ResponseEntity<ApiResponse<String>> credit(@RequestParam("amount") double amount,
+    @PostMapping("/deposit")
+    public ResponseEntity<ApiResponse<TAccountBalanceDto>> credit(@RequestParam("amount") double amount,
                               @RequestParam("userId") String userId,
                               @RequestParam("reference") String reference) {
         log.info("Crediting account balance for user: {}", userId);
-        accountService.creditBalance( userId, amount, reference);
-        return ResponseEntity.ok(ApiResponse.success("Account credited successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Account credited successfully", accountService.depositCurrentAccount( userId, amount, reference)));
     }
 
     @PostMapping("/withdraw")

@@ -159,7 +159,7 @@
     </changeSet>
 
     <changeSet id="add-index-to- transaction table" author="Ngai Elizabeth">
-        <createIndex tableName="transactions" indexName="idx_user_id" unique="true">
+        <createIndex tableName="transactions" indexName="idx_user_id">
             <column name="user_id"/>
         </createIndex>
     </changeSet>
@@ -170,6 +170,9 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+        <createIndex tableName="transactions" indexName="idx_reference" unique="true">
+            <column name="reference"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>
 

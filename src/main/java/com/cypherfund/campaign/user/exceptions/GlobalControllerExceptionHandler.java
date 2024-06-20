@@ -26,12 +26,14 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<HttpErrorInfo> handleAllExceptions(Exception ex, WebRequest request)  {
+    log.error("Handling exception: " + ex.getClass().getSimpleName() + " > " + ex.getMessage());
     HttpErrorInfo errorDetails = new HttpErrorInfo(INTERNAL_SERVER_ERROR, request.getDescription(false), ex.getMessage());
     return new ResponseEntity<>(errorDetails, INTERNAL_SERVER_ERROR);
 
   }
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    log.error("Handling exception: " + ex.getClass().getSimpleName() + " > " + ex.getMessage());
     if (ex instanceof MethodArgumentNotValidException) {
       BindingResult bindingResult = ((MethodArgumentNotValidException)ex).getBindingResult();
       HttpErrorInfo errorDetails = new HttpErrorInfo(BAD_REQUEST, request.getDescription(false), ex.getMessage());
