@@ -20,9 +20,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "t_users", schema = "users", indexes = {
-        @Index(name = "user status", columnList = "status")
-})
+@Table(name = "t_users")
 public class TUser implements Serializable {
     private static final long serialVersionUID = 1810721705496824031L;
     @Id

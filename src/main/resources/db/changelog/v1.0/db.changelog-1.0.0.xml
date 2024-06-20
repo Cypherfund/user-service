@@ -100,5 +100,76 @@
             <where>img_url = ''</where>
         </update>
     </changeSet>
+
+    <changeSet id="create-account-balance-table" author="Ngai Elizabeth">
+        <createTable tableName="t_account_balance">
+            <column name="lg_account_balance_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="lg_user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="d_cur_balance" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="d_win_balance" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_updated" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create table for record transactions" author="Ngai Elizabeth">
+        <createTable tableName="transactions">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(50)"/>
+            <column name="type" type="ENUM('BB_BET', 'BB_WINNING', 'WITHDRAWAL', 'DEPOSIT', 'SUBSCRIPTION')"/>
+            <column name="amount" type="DECIMAL(10,2)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add-foreign-key-to-transactions-table" author="Ngai Elizabeth">
+        <addForeignKeyConstraint baseTableName="transactions"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user_id_transactions"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="add-foreign-key-to-account-balance-table" author="Ngai Elizabeth">
+        <addForeignKeyConstraint baseTableName="t_account_balance"
+                                 baseColumnNames="lg_user_id"
+                                 constraintName="fk_user_id_account_balance"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="add-index-to-t_account_balance" author="Ngai Elizabeth">
+        <createIndex tableName="t_account_balance" indexName="idx_user_id" unique="true">
+            <column name="lg_user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add-index-to- transaction table" author="Ngai Elizabeth">
+        <createIndex tableName="transactions" indexName="idx_user_id" unique="true">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add-column-reference-to-transactions" author="Ngai Elizabeth">
+        <addColumn tableName="transactions">
+            <column name="reference" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 

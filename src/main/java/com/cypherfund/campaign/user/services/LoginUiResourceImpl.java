@@ -3,7 +3,7 @@ package com.cypherfund.campaign.user.services;
 import com.cypherfund.campaign.user.controller.LoginUiResource;
 import com.cypherfund.campaign.user.dal.entity.TRole;
 import com.cypherfund.campaign.user.dal.entity.TRoleUser;
-import com.cypherfund.campaign.user.dal.entity.TRoleUserRepository;
+import com.cypherfund.campaign.user.dal.repository.TRoleUserRepository;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TRoleRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
