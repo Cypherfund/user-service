@@ -21,9 +21,10 @@ public class AccountUiResource {
     AccountService accountService;
 
     @PostMapping("/winning")
-    public ResponseEntity<ApiResponse<String>> creditWinning(@RequestParam("amount") double amount,
-                              @RequestParam("userId") String userId,
-                              @RequestParam("reference") String reference) {
+    public ResponseEntity<ApiResponse<String>> creditWinning(
+                                @RequestParam("amount") double amount,
+                                @RequestParam("userId") String userId,
+                                @RequestParam("reference") String reference) {
         log.info("Crediting winning balance for user: {}", userId);
         accountService.creditWinningBalance( userId, amount, reference);
         return ResponseEntity.ok(ApiResponse.success("Winning credited successfully", null));

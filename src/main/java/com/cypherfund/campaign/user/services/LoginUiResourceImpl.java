@@ -16,6 +16,7 @@ import com.cypherfund.campaign.user.model.SignUpRequest;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,20 +76,28 @@ public class LoginUiResourceImpl implements LoginUiResource {
     @Override
     @Transactional
     public ResponseEntity<ApiResponse> registerUser(SignUpRequest signUpRequest) {
-        if(userRepository.existsByUsername(signUpRequest.getUsername())) {
+        if(StringUtils.isNotBlank(signUpRequest.getUsername()) && userRepository.existsByUsername(signUpRequest.getUsername())) {
             return new ResponseEntity<>(new ApiResponse(false, "Username is already taken!", ""),
                     HttpStatus.CONFLICT);
         }
 
-        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if(StringUtils.isNotBlank(signUpRequest.getEmail()) && userRepository.existsByEmail(signUpRequest.getEmail())) {
             return new ResponseEntity<>(new ApiResponse(false, "Email Address already in use!", ""),
                     HttpStatus.CONFLICT);
         }
 
-        if(userRepository.existsByPhone(signUpRequest.getPhone())) {
+        if(StringUtils.isNotBlank(signUpRequest.getPhone()) && userRepository.existsByPhone(signUpRequest.getPhone())) {
             return new ResponseEntity<>(new ApiResponse(false, "Phone number already in use!", ""),
                     HttpStatus.CONFLICT);
         }
+
+        if(StringUtils.isBlank(signUpRequest.getUsername())
+                && StringUtils.isBlank(signUpRequest.getEmail())
+                && StringUtils.isBlank(signUpRequest.getPhone())) {
+            return new ResponseEntity<>(new ApiResponse(false, "Username, Email or Phone is required!", ""),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         // Creating user's account
         TUser user = new TUser();
         user.setUserId(UUID.randomUUID().toString());
