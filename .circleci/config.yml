@@ -45,11 +45,11 @@ jobs:
       - run:
           name: Build Image
           command: |
-            ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=${DOCKER_REGISTRY}/${REGISTRY_USER}/user-service:<< pipeline.number >>_${CIRCLE_SHA1}
-      - docker/push:
-          image: ${REGISTRY_USER}/user-service
-          tag: << pipeline.number >>_${CIRCLE_SHA1}
-          registry: ${DOCKER_REGISTRY}
+            chmod +x mvnw && ./mvnw compile jib:build -Dimage=${DOCKER_REGISTRY}/${REGISTRY_USER}/user-service:<< pipeline.number >>_${CIRCLE_SHA1}
+#      - docker/push:
+#          image: ${REGISTRY_USER}/user-service
+#          tag: << pipeline.number >>_${CIRCLE_SHA1}
+#          registry: ${DOCKER_REGISTRY}
 
   deploy:
     machine:
