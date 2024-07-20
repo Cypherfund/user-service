@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Enumerations {
+
     public enum USER_ROLES {
         CUSTOMER, ADMIN, SUPER_ADMIN, DISTRIBUTOR, TALENT, CLIENT, TUTOR, STUDENT;
         private static final Set<String> ROLE_NAMES = new HashSet<>();
@@ -34,5 +35,9 @@ public class Enumerations {
         facebook,
         google,
         github
+    }
+
+    public enum USER {
+        USER_EXISTS, USER_NOT_EXISTS
     }
 }

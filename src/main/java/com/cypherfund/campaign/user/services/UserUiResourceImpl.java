@@ -49,10 +49,8 @@ public class UserUiResourceImpl implements UserUiResource {
 
     @Override
     public ResponseEntity<ApiResponse<String>> validUsername(String username) {
-        if (userRepository.existsByPhoneOrEmailOrUsername(username, username, username)) {
-            throw new RuntimeException("user already exists with username {}");
-        }
-        return  ResponseEntity.ok(new ApiResponse<>(true, "", ""));
+        boolean userExists = userRepository.existsByPhoneOrEmailOrUsername(username, username, username);
+        return  ResponseEntity.ok(new ApiResponse<>(true, "", userExists ? Enumerations.USER.USER_EXISTS.name() : Enumerations.USER.USER_NOT_EXISTS.name()));
     }
 
     @Override
