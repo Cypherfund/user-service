@@ -3,7 +3,9 @@ package com.cypherfund.campaign.user.controller;
 import com.cypherfund.campaign.user.dal.entity.Transaction;
 import com.cypherfund.campaign.user.dto.TAccountBalanceDto;
 import com.cypherfund.campaign.user.model.ApiResponse;
+import com.cypherfund.campaign.user.model.CallbackResponse;
 import com.cypherfund.campaign.user.model.DebitRequest;
+import com.cypherfund.campaign.user.model.RechargeRequest;
 import com.cypherfund.campaign.user.services.AccountService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +40,19 @@ public class AccountUiResource {
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<ApiResponse<TAccountBalanceDto>> credit(@RequestParam("amount") double amount,
-                              @RequestParam("userId") String userId,
-                              @RequestParam("reference") String reference) {
-        log.info("Crediting account balance for user: {}", userId);
-        return ResponseEntity.ok(ApiResponse.success("Account credited successfully", accountService.depositCurrentAccount( userId, amount, reference)));
+    public ResponseEntity<ApiResponse<TAccountBalanceDto>> credit(@RequestBody @Valid RechargeRequest rechargeRequest) {
+        return ResponseEntity.ok(ApiResponse.success("Account credited successfully", accountService.depositCurrentAccount(rechargeRequest)));
+    }
+
+    @PostMapping("/callback")
+    public void callback(@RequestBody CallbackResponse callback) {
+        accountService.processCallback(callback);
+        ResponseEntity.ok();
+    }
+
+    @PostMapping("/status")
+    public ResponseEntity<ApiResponse<String>> checkStatus(@RequestParam("reference") String reference) {
+        return ResponseEntity.ok(ApiResponse.success("Status checked successfully", accountService.checkStatus(reference)));
     }
 
     @PostMapping("/withdraw")

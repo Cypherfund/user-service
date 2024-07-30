@@ -174,5 +174,39 @@
             <column name="reference"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="create-t_trace-table" author="Ngai Elizabeth">
+        <createTable tableName="t_trace">
+            <column name="lg_trace_id" type="varchar(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="db_amount" type="double"/>
+            <column name="dt_date_created" type="datetime(6)"/>
+            <column name="str_originating_transaction" type="varchar(255)"/>
+            <column name="str_phone_number" type="varchar(255)"/>
+            <column name="str_provider_code" type="varchar(10)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-t_trace_status-table" author="Ngai Elizabeth">
+        <createTable tableName="t_trace_status">
+            <column name="lg_trace_status" type="varchar(100)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="dt_date_created" type="datetime(6)"/>
+            <column name="lg_trace_id" type="varchar(100)"/>
+            <column name="str_ext_code" type="varchar(255)"/>
+            <column name="str_external_transaction" type="varchar(255)"/>
+            <column name="str_msg" type="varchar(255)"/>
+            <column name="str_status" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="add-user-id-to-t_trace" author="Ngai Elizabeth">
+        <addColumn tableName="t_trace">
+            <column name="lg_user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 
