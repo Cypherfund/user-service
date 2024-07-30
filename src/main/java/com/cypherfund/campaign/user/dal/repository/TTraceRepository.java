@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface TTraceRepository extends JpaRepository<TTrace, String> {
     Optional<TTrace> findByStrOriginatingTransaction(String reference);
+    boolean existsByStrOriginatingTransaction(String reference);
 }

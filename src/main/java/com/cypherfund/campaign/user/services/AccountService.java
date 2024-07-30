@@ -8,6 +8,7 @@ import com.cypherfund.campaign.user.model.*;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import com.cypherfund.campaign.user.services.paymentProcess.IPaymentProcess;
 import com.cypherfund.campaign.user.utils.Enumerations;
+import com.cypherfund.campaign.user.utils.ErrorConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -87,6 +88,12 @@ public class AccountService {
         log.info("Recharging account for user: {}", userId);
 
         tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
+
+        if (traceRepository.existsByStrOriginatingTransaction(request.getReference())) {
+            ErrorConstants.ErrorConstantsEnum errorConstantsEnum = ErrorConstants.ErrorConstantsEnum.CONFLICT;
+            errorConstantsEnum.setMessage("Reference already used");
+            throw new AppException(errorConstantsEnum);
+        }
 
         log.info("Creating trace");
         TTrace trace = createTrace(request);

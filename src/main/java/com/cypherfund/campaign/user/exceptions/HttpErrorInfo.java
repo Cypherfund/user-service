@@ -16,6 +16,7 @@ public class HttpErrorInfo {
     private String path;
     private HttpStatus httpStatus;
     private String message;
+    private String errorCode;
 
     public HttpErrorInfo(HttpStatus httpStatus, String path, String message) {
         timestamp = LocalDateTime.now();

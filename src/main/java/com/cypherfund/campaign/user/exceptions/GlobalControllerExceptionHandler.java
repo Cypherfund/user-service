@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  *
@@ -50,6 +48,13 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   public ResponseEntity<HttpErrorInfo> handleNotFoundExceptions(Exception ex, WebRequest request) {
     HttpErrorInfo errorDetails = new HttpErrorInfo(NOT_FOUND, request.getDescription(false), ex.getMessage());
     return new ResponseEntity<>(errorDetails, NOT_FOUND);
+  }
+
+  @ExceptionHandler(AppException.class)
+  public ResponseEntity<HttpErrorInfo> handleAppExceptions(AppException ex, WebRequest request) {
+    HttpErrorInfo errorDetails = new HttpErrorInfo(ex.getErrorConstantsEnum().getHttpStatus(), request.getDescription(false), ex.getMessage());
+    errorDetails.setErrorCode(ex.getErrorConstantsEnum().getErrorCode());
+    return new ResponseEntity<>(errorDetails, OK);
   }
 
   @ExceptionHandler(InvalidInputException.class)

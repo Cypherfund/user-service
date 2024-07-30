@@ -9,7 +9,6 @@ public class DebitRequest {
     double amount;
     String reference;
     Enumerations.TRANSACTION_TYPE transactionType;
-
-
+    private String extra;
 
 }
