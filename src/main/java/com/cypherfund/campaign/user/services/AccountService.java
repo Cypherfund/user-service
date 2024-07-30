@@ -5,6 +5,7 @@ import com.cypherfund.campaign.user.dal.repository.*;
 import com.cypherfund.campaign.user.dto.TAccountBalanceDto;
 import com.cypherfund.campaign.user.exceptions.AppException;
 import com.cypherfund.campaign.user.model.*;
+import com.cypherfund.campaign.user.security.UserPrincipal;
 import com.cypherfund.campaign.user.services.paymentProcess.IPaymentProcess;
 import com.cypherfund.campaign.user.utils.Enumerations;
 import lombok.RequiredArgsConstructor;
@@ -81,7 +82,7 @@ public class AccountService {
     public TAccountBalanceDto depositCurrentAccount(RechargeRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String userId = ((UserDetails) authentication.getPrincipal()).getUsername();
+        String userId = ((UserPrincipal) authentication.getPrincipal()).getId();
 
         log.info("Recharging account for user: {}", userId);
 
@@ -240,6 +241,7 @@ public class AccountService {
         tTrace.setDbAmount(request.getAmount());
         tTrace.setStrPhoneNumber(request.getExtra());
         tTrace.setStrOriginatingTransaction(request.getReference());
+        tTrace.setLgUserId(request.getUserId());
 
         return traceRepository.save(tTrace);
     }

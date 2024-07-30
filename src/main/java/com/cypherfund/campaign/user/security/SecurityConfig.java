@@ -55,7 +55,9 @@ public class SecurityConfig {
             "/validate-token",
             "/actuator",
             "/actuator/**",
-            "/account/**",
+            "/account/callback",
+            "/account/play",
+            "/account/winning",
 
     };
     private final String[] permittedGets = new String[]{
