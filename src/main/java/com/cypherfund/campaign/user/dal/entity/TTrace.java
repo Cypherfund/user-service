@@ -44,4 +44,8 @@ public class TTrace {
     @Column(name = "lg_user_id", nullable = false, length = 50)
     private String lgUserId;
 
+    @Size(max = 15)
+    @Column(name = "str_type", length = 15)
+    private String strType;
+
 }

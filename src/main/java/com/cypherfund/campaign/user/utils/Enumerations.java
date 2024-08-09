@@ -2,7 +2,7 @@ package com.cypherfund.campaign.user.utils;
 
 public class Enumerations {
     public enum TRANSACTION_TYPE {
-        BB_BET, BB_WINNING, WITHDRAWAL, DEPOSIT, SUBSCRIPTION
+        BB_BET, BB_WINNING, WITHDRAWAL, DEPOSIT, SUBSCRIPTION, COIN_PURCHASE, COIN_REWARD, COIN_DEBIT
     }
 
     public enum COINBASE_PRICE_TYPE {

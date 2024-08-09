@@ -40,4 +40,7 @@ public class TAccountBalance {
     @Column(name = "dt_updated", nullable = false)
     private Instant dtUpdated;
 
+    @Column(name = "db_coin_balance", precision = 10)
+    private BigDecimal dbCoinBalance;
+
 }

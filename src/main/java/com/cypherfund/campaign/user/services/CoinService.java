@@ -4,7 +4,9 @@ import com.cypherfund.campaign.user.dal.entity.*;
 import com.cypherfund.campaign.user.dal.repository.*;
 import com.cypherfund.campaign.user.dto.TAccountBalanceDto;
 import com.cypherfund.campaign.user.exceptions.AppException;
-import com.cypherfund.campaign.user.model.*;
+import com.cypherfund.campaign.user.model.DebitRequest;
+import com.cypherfund.campaign.user.model.PaymentResponse;
+import com.cypherfund.campaign.user.model.RechargeCoinRequest;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import com.cypherfund.campaign.user.services.paymentProcess.IPaymentProcess;
 import com.cypherfund.campaign.user.utils.Enumerations;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ import static com.cypherfund.campaign.user.utils.Enumerations.TRANSACTION_TYPE.*
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AccountService {
+public class CoinService {
     private final ModelMapper modelMapper;
     private final TUserRepository tUserRepository;
     private final TAccountBalanceRepository tAccountBalanceRepository;
@@ -38,12 +39,10 @@ public class AccountService {
     private final TTraceRepository traceRepository;
     private final TTraceStatusRepository traceStatusRepository;
     private final Map<Enumerations.PaymentMethod, IPaymentProcess> paymentProcesses;
-    private final CoinService coinService;
-
 
     @Transactional
-    public void creditWinningBalance(String userId, double amount, String reference) {
-        log.info("Crediting winning balance for user: {}", userId);
+    public void coinReward(String userId, double amount, String reference) {
+        log.info("Rewarding coin balance for user: {}", userId);
 
         TUser user = tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
         TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId).orElseGet(() -> {
@@ -51,40 +50,24 @@ public class AccountService {
             newAccountBalance.setLgUserId(userId);
             newAccountBalance.setDCurBalance(BigDecimal.ZERO);
             newAccountBalance.setDWinBalance(BigDecimal.ZERO);
+            newAccountBalance.setDbCoinBalance(BigDecimal.ZERO);
             newAccountBalance.setDtCreated(Instant.now());
             return tAccountBalanceRepository.save(newAccountBalance);
         });
 
-        accountBalance.setDWinBalance(accountBalance.getDWinBalance().add(BigDecimal.valueOf(amount)));
+        accountBalance.setDbCoinBalance(accountBalance.getDbCoinBalance().add(BigDecimal.valueOf(amount)));
 
         tAccountBalanceRepository.save(accountBalance);
 
-        createTransaction(userId, BB_WINNING, amount, reference);
+        createTransaction(userId, COIN_REWARD, amount, reference);
     }
 
-    @Transactional
-    public void debitWinningBalance(String userId, double amount, String reference) {
-        log.info("Debiting winning balance for user: {}", userId);
-
-        TUser user = tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
-        TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId)
-                .orElseThrow(() -> new AppException("Account balance not found"));
-
-        if (accountBalance.getDWinBalance().compareTo(BigDecimal.valueOf(amount)) < 0)
-            throw new AppException("Insufficient balance");
-        accountBalance.setDWinBalance(accountBalance.getDWinBalance().subtract(BigDecimal.valueOf(amount)));
-
-        tAccountBalanceRepository.save(accountBalance);
-
-        createTransaction(userId, WITHDRAWAL, amount, reference);
-    }
-
-    public TAccountBalanceDto depositCurrentAccount(RechargeRequest request) {
+    public TAccountBalanceDto creditCoinBalance(RechargeCoinRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String userId = ((UserPrincipal) authentication.getPrincipal()).getId();
 
-        log.info("Recharging account for user: {}", userId);
+        log.info("Recharging coin balance for user: {}", userId);
 
         tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
 
@@ -112,35 +95,12 @@ public class AccountService {
         this.createTraceStatus(PENDING.name(), paymentResponse.getTransactionId(), "Payment request sent to payment service", trace.getLgTraceId());
 
         if (paymentResponse.getStatus().equals(Enumerations.PAYMENT_STATUS.SUCCESS)) {
-            return updateUserBalance(userId, request.getAmount(), request.getReference(), DEPOSIT);
+            return updateUserBalance(userId, request.getAmount(), request.getReference(), Enumerations.TRANSACTION_TYPE.COIN_PURCHASE);
         } else if (paymentResponse.getStatus().equals(PENDING)){
             log.info("payment response: {}", paymentResponse);
             return null;
         }else {
             throw new AppException("payment failed");
-        }
-    }
-
-    @Transactional
-    public void processCallback(CallbackResponse callbackResponse) {
-        TTraceStatus traceStatus = traceStatusRepository.findByStrExternalTransaction(callbackResponse.getTransactionId())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new AppException("Invalid transaction id"));
-
-        TTrace trace = traceRepository.findById(traceStatus.getLgTraceId())
-                .orElseThrow(() -> new AppException("Invalid trace id"));
-
-        if (callbackResponse.getStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.SUCCESS.name())) {
-            createTraceStatus(Enumerations.PAYMENT_STATUS.SUCCESS.name(), callbackResponse.getTransactionId(), "Payment successful", trace.getLgTraceId());
-            String transactionType = trace.getStrType();
-            if (transactionType.equalsIgnoreCase(COIN_PURCHASE.name())) {
-                this.coinService.updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), COIN_PURCHASE);
-            } else {
-                updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), DEPOSIT);
-            }
-        } else {
-            createTraceStatus(Enumerations.PAYMENT_STATUS.FAILED.name(), callbackResponse.getTransactionId(), "Payment failed", trace.getLgTraceId());
         }
     }
 
@@ -154,7 +114,7 @@ public class AccountService {
                 .orElseThrow(() -> new AppException("Invalid trace id"));
 
         if (traceStatus.getStrStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.SUCCESS.name())) {
-            updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), DEPOSIT);
+            updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), Enumerations.TRANSACTION_TYPE.COIN_PURCHASE);
             return Enumerations.PAYMENT_STATUS.SUCCESS.name();
         } else if (traceStatus.getStrStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.FAILED.name())) {
             return Enumerations.PAYMENT_STATUS.FAILED.name();
@@ -178,7 +138,7 @@ public class AccountService {
             return modelMapper.map(accountBalance, TAccountBalanceDto.class);
         }
 
-        accountBalance.setDCurBalance(accountBalance.getDCurBalance().add(BigDecimal.valueOf(amount)));
+        accountBalance.setDbCoinBalance(accountBalance.getDbCoinBalance().add(BigDecimal.valueOf(amount)));
 
         accountBalance = tAccountBalanceRepository.save(accountBalance);
 
@@ -188,14 +148,14 @@ public class AccountService {
     }
 
     @Transactional
-    public void debitBalance(DebitRequest debitRequest) {
-        log.info("Debiting balance for user: {}", debitRequest.getUserId());
+    public void debitCoinBalance(DebitRequest debitRequest) {
+        log.info("Debiting coin balance for user: {}", debitRequest.getUserId());
 
-        TUser user = tUserRepository.findById(debitRequest.getUserId()).orElseThrow(() -> new AppException("User not found"));
+        tUserRepository.findById(debitRequest.getUserId()).orElseThrow(() -> new AppException("User not found"));
         TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(debitRequest.getUserId())
                 .orElseThrow(() -> new AppException("Account balance not found"));
 
-        if (accountBalance.getDCurBalance().compareTo(BigDecimal.valueOf(debitRequest.getAmount())) < 0)
+        if (accountBalance.getDbCoinBalance().compareTo(BigDecimal.valueOf(debitRequest.getAmount())) < 0)
             throw new AppException("Insufficient balance");
 
         accountBalance.setDCurBalance(accountBalance.getDCurBalance().subtract(BigDecimal.valueOf(debitRequest.getAmount())));
@@ -207,7 +167,6 @@ public class AccountService {
                 debitRequest.getAmount(),
                 debitRequest.getReference());
     }
-
 
 
     private void createTransaction(String userId, Enumerations.TRANSACTION_TYPE withdrawal, double amount, String reference) {
@@ -222,15 +181,6 @@ public class AccountService {
     }
 
 
-    public TAccountBalanceDto getBalance(String userId) {
-        log.info("Retrieving balance for user: {}", userId);
-
-        TAccountBalance accountBalance = tAccountBalanceRepository.findByLgUserId(userId)
-                .orElseGet(() -> createNewAccount(userId));
-
-        return modelMapper.map(accountBalance, TAccountBalanceDto.class);
-    }
-
     private TAccountBalance createNewAccount(String userId) {
         TAccountBalance newAccountBalance = new TAccountBalance();
         newAccountBalance.setLgUserId(userId);
@@ -241,21 +191,16 @@ public class AccountService {
         return tAccountBalanceRepository.save(newAccountBalance);
     }
 
-    public List<Transaction> getTransactions(String userId) {
-        log.info("Retrieving transactions for user: {}", userId);
-        return transactionRepository.findByUserId(userId);
-    }
-
-    private TTrace createTrace(RechargeRequest request) {
+    private TTrace createTrace(RechargeCoinRequest request) {
         TTrace tTrace = new TTrace();
         tTrace.setLgTraceId(UUID.randomUUID().toString());
         tTrace.setDtDateCreated(new Date().toInstant());
         tTrace.setStrProviderCode(request.getPaymentCode());
-        tTrace.setDbAmount(request.getAmount());
+        tTrace.setDbAmount(request.getCoinAmount());
         tTrace.setStrPhoneNumber(request.getExtra());
         tTrace.setStrOriginatingTransaction(request.getReference());
         tTrace.setLgUserId(request.getUserId());
-        tTrace.setStrType(Enumerations.TRANSACTION_TYPE.DEPOSIT.name());
+        tTrace.setStrType(Enumerations.TRANSACTION_TYPE.COIN_PURCHASE.name());
 
         return traceRepository.save(tTrace);
     }

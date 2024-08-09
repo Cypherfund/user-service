@@ -208,5 +208,23 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-coin-balance-to-account-table" author="Ngai Elizabeth">
+        <addColumn tableName="t_account_balance">
+            <column name="db_coin_balance" type="DECIMAL(10)" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="update-type-column-in-transaction" author="Ngai Elizabeth">
+        <sql>
+            ALTER TABLE transactions MODIFY COLUMN type ENUM('BB_BET', 'BB_WINNING', 'WITHDRAWAL', 'DEPOSIT', 'SUBSCRIPTION', 'COIN_PURCHASE', 'COIN_REWARD', 'COIN_DEBIT');
+        </sql>
+    </changeSet>
+
+    <changeSet id="add-type-to-t_trace" author="Ngai Elizabeth">
+        <addColumn tableName="t_trace">
+            <column name="str_type" type="varchar(15)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 
