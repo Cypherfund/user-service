@@ -4,6 +4,7 @@ import com.cypherfund.campaign.user.controller.TiktokLoginUiResource;
 import com.cypherfund.campaign.user.dal.entity.TProfile;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
+import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
 import com.cypherfund.campaign.user.model.*;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
@@ -18,7 +19,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -61,6 +61,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private final TProfileRepository profileRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TUserRepository userRepository;
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response, String username, String email) {
@@ -104,12 +105,6 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             log.error("Error: " + error + ", Description: " + errorDescription);
         }
 
-        log.info("Code: " + code);
-        log.info("State: " + state);
-        log.info("csrfState: " + csrfState);
-        log.info("Scopes: " + scopes);
-        log.info("Error: " + error);
-
         SignUpRequest signUpRequest = (SignUpRequest) redisTemplate.opsForValue().get("TEMP:LOGIN:TIKTOK:"+state);
         log.info("Sign up request: " + signUpRequest);
 
@@ -148,11 +143,13 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             return loginUser(profileOptional.get());
         }
 
-
         signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
         signUpRequest.setPassword(signUpRequest.getUsername());
 
-        TUser user = loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok);
+        //if use already exist in the system, just create another profile for the user
+        Optional<TUser> userOptional = userRepository.findByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
+
+        TUser user = userOptional.orElse(loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok));
 
         TProfile profile = new TProfile();
         profile.setSocialMediaAccount(tiktok);
