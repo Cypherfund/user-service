@@ -23,6 +23,10 @@ jobs:
             docker images
             docker run -d --name test-db -e MYSQL_ROOT_PASSWORD=rootadmin -e MYSQL_DATABASE=user-test -p 3306:3306 mysql:latest
       - run:
+          name: Start redis test db
+          command: |
+            docker run -d --name test-redis -p 6379:6379 redis:latest
+      - run:
           name: Run Unit Tests
           command: ./mvnw test
       - store_test_results:
