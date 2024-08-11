@@ -15,4 +15,8 @@ public class Enumerations {
     public enum PaymentMethod {
         CREDIT_CARD, CRYPTO_WALLET, MOBILE_WALLET
     }
+
+    public enum SOCIAL_MEDIA_PLATFORM {
+        tiktok, instagram, facebook, twitter, youtube, x, github
+    }
 }

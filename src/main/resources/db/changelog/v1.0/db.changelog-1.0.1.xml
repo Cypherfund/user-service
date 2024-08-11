@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        context="prod">
+    <changeSet id="create profiles table" author="Ngai Elizabeth">
+        <createTable tableName="t_profile">
+            <column name="profile_id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="social_media_account" type="ENUM('tiktok', 'instagram', 'youtube', 'x', 'facebook', 'google', 'github')">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="t_profile"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_profiles_users"
+                                 referencedTableName="t_users"
+                                 referencedColumnNames="user_id"/>
+    </changeSet>
+</databaseChangeLog>
+

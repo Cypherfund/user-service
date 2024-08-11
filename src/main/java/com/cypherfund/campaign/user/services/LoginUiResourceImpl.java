@@ -17,6 +17,7 @@ import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -99,6 +100,17 @@ public class LoginUiResourceImpl implements LoginUiResource {
         }
 
         // Creating user's account
+        TUser result = createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.local);
+
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/users/{username}")
+                .buildAndExpand(result.getUsername()).toUri();
+
+        return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully", "x"));
+    }
+
+    public TUser createUser(SignUpRequest signUpRequest, Enumerations.AUTH_PRIVIDERS authPrividers) {
         TUser user = new TUser();
         user.setUserId(UUID.randomUUID().toString());
         user.setName(signUpRequest.getName());
@@ -108,7 +120,7 @@ public class LoginUiResourceImpl implements LoginUiResource {
         user.setPhone(signUpRequest.getPhone());
         user.setDtCreated(new Date().toInstant());
         user.setStatus(Enumerations.USER_STATUS.active.name());
-        user.setStrLoginProvider(Enumerations.AUTH_PRIVIDERS.local.name());
+        user.setStrLoginProvider(authPrividers.name());
 
         boolean allRolesPresent = areAllRolesPresent(signUpRequest.getRoles());
 
@@ -127,15 +139,8 @@ public class LoginUiResourceImpl implements LoginUiResource {
             tRoleUsers.add(tRoleUser);
         }
 
-
         TUser result = userRepository.save(user);
         tRoleUserRepository.saveAll(tRoleUsers);
-
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/users/{username}")
-                .buildAndExpand(result.getUsername()).toUri();
-
-        return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully", "x"));
+        return result;
     }
 }

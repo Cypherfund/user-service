@@ -34,7 +34,8 @@ public class Enumerations {
         local,
         facebook,
         google,
-        github
+        github,
+        tiktok
     }
 
     public enum USER {

@@ -51,6 +51,7 @@ public class SecurityConfig {
             "/users/validate-token",
             "/signup",
             "/signin",
+            "/login/**",
             "/oauth2/**",
             "/validate-token",
             "/actuator",
@@ -62,6 +63,7 @@ public class SecurityConfig {
     };
     private final String[] permittedGets = new String[]{
             "/users/*",
+            "/login/**",
             "/users/id/*",
             "/users/valid/*"
     };
