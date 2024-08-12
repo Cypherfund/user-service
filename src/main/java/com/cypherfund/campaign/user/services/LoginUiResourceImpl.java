@@ -121,6 +121,7 @@ public class LoginUiResourceImpl implements LoginUiResource {
         user.setDtCreated(new Date().toInstant());
         user.setStatus(Enumerations.USER_STATUS.active.name());
         user.setStrLoginProvider(authPrividers.name());
+        user.setImgUrl(signUpRequest.getImageUrl());
 
         boolean allRolesPresent = areAllRolesPresent(signUpRequest.getRoles());
 
