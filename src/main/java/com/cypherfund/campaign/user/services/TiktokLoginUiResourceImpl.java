@@ -143,6 +143,12 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
             log.info("User already exists, logging in");
 
+            if (signUpRequest.getRedirectUrl() != null) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setLocation(URI.create(signUpRequest.getRedirectUrl()));
+                return ResponseEntity.status(302).headers(headers).build();
+            }
+
             return loginUser(profileOptional.get());
         }
 
