@@ -63,6 +63,7 @@ public class SecurityConfig {
     };
     private final String[] permittedGets = new String[]{
             "/users/*",
+            "/oauth2/**",
             "/login/**",
             "/users/id/*",
             "/users/valid/*"
