@@ -11,7 +11,8 @@ public interface TiktokLoginUiResource {
     @GetMapping("/authorize/tiktok")
     ResponseEntity initiateTiktokLogin(HttpServletResponse response,
                                        @RequestParam String username,
-                                       @RequestParam String email);
+                                       @RequestParam String email,
+                                       @RequestParam(required = false) String redirectUrl);
 
     @GetMapping("/callback/tiktok")
     ResponseEntity<JwtAuthenticationResponse> completeTiktokLogin(@RequestParam(value = "code", required = false) String code,

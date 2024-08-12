@@ -64,7 +64,10 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private final TUserRepository userRepository;
 
     @Override
-    public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response, String username, String email) {
+    public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
+                                                                         String username,
+                                                                         String email,
+                                                                         String redirectUrl) {
         // Generate CSRF state token
         String csrfState = UUID.randomUUID().toString();
         Cookie csrfCookie = new Cookie("csrfState", csrfState);
@@ -77,7 +80,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setEmail(username);
         signUpRequest.setUsername(email);
-        signUpRequest.setCsrfToken(csrfState);
+        signUpRequest.setRedirectUrl(redirectUrl);
 
         redisTemplate.opsForValue().set("TEMP:LOGIN:TIKTOK:"+csrfState, signUpRequest);
         redisTemplate.expire("TEMP:LOGIN:TIKTOK:"+csrfState, 600, TimeUnit.SECONDS);
@@ -159,6 +162,12 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profile.setUser(user);
         profile.setDtCreatedAt(Instant.now());
         profileRepository.save(profile);
+
+        if (signUpRequest.getRedirectUrl() != null) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(signUpRequest.getRedirectUrl()));
+            return ResponseEntity.status(302).headers(headers).build();
+        }
 
         return loginUser(profile);
     }

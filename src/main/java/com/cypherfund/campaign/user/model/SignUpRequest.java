@@ -25,7 +25,7 @@ public class SignUpRequest {
     @Email
     private String email;
 
-    private String csrfToken;
+    private String redirectUrl;
 
 //    @Pattern(regexp="^(\\+\\d{3})\\d{5,16}$", message="incorrect phone number: expected format is +xxx xxxxx")
     @Size(max = 20)
