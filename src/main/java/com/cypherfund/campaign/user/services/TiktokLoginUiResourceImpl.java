@@ -33,6 +33,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -143,13 +144,9 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
             log.info("User already exists, logging in");
 
-            if (signUpRequest.getRedirectUrl() != null) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.setLocation(URI.create(signUpRequest.getRedirectUrl()));
-                return ResponseEntity.status(302).headers(headers).build();
-            }
+            ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
 
-            return loginUser(profileOptional.get());
+            return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
         }
 
         signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
@@ -170,13 +167,21 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profile.setDtCreatedAt(Instant.now());
         profileRepository.save(profile);
 
+        ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
+
+        return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
+
+    }
+
+    private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
         if (signUpRequest.getRedirectUrl() != null) {
+            String redirectUrl = redirectUri + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken() + "&userId=" + loginResponse.getBody().getUserId();
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(signUpRequest.getRedirectUrl()));
+            headers.setLocation(URI.create(redirectUrl));
             return ResponseEntity.status(302).headers(headers).build();
         }
 
-        return loginUser(profile);
+        return loginResponse;
     }
 
     @NotNull
