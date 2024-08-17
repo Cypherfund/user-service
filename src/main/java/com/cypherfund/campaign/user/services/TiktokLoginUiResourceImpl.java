@@ -179,7 +179,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
         if (signUpRequest.getRedirectUrl() != null) {
             log.info("Redirecting user to: " + signUpRequest.getRedirectUrl());
-            String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken() + "&userId=" + loginResponse.getBody().getUserId();
+            String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken();
             log.info("Redirect URL: " + redirectUrl);
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8)));
