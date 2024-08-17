@@ -25,6 +25,7 @@ public class GlobalControllerExceptionHandler extends ResponseEntityExceptionHan
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<HttpErrorInfo> handleAllExceptions(Exception ex, WebRequest request)  {
     log.error("Handling exception: " + ex.getClass().getSimpleName() + " > " + ex.getMessage());
+    ex.printStackTrace();
     HttpErrorInfo errorDetails = new HttpErrorInfo(INTERNAL_SERVER_ERROR, request.getDescription(false), ex.getMessage());
     return new ResponseEntity<>(errorDetails, INTERNAL_SERVER_ERROR);
 
