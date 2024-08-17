@@ -10,12 +10,14 @@ import com.cypherfund.campaign.user.exceptions.NotFoundException;
 import com.cypherfund.campaign.user.model.ApiResponse;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class UserUiResourceImpl implements UserUiResource {
@@ -55,6 +57,7 @@ public class UserUiResourceImpl implements UserUiResource {
 
     @Override
     public ResponseEntity<?> validateToken(String token) {
+        log.info("Validating token {}", token);
         String userId = tokenProvider.getUserIdFromJWT(token);
         TUserDto userDto = userRepository.findById(userId)
                 .map(this::mapToUserDto)
