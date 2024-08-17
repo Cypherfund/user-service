@@ -182,7 +182,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken();
             log.info("Redirect URL: " + redirectUrl);
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8)));
+            headers.setLocation(URI.create(redirectUrl));
             return ResponseEntity.status(302).headers(headers).build();
         }
 
