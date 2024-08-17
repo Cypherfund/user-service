@@ -30,6 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
@@ -181,7 +182,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken() + "&userId=" + loginResponse.getBody().getUserId();
             log.info("Redirect URL: " + redirectUrl);
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(redirectUrl));
+            headers.setLocation(URI.create(URLEncoder.encode(redirectUrl, StandardCharsets.UTF_8)));
             return ResponseEntity.status(302).headers(headers).build();
         }
 
