@@ -41,5 +41,11 @@
                         columnName="img_url"
                         newDataType="VARCHAR(255)"/>
     </changeSet>
+
+    <changeSet id="increase image_url to 500" author="Ngai Elizabeth">
+        <modifyDataType tableName="t_users"
+                        columnName="img_url"
+                        newDataType="VARCHAR(500)"/>
+    </changeSet>
 </databaseChangeLog>
 
