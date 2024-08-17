@@ -35,5 +35,11 @@
                                  referencedTableName="t_users"
                                  referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="increase image_url to 255" author="Ngai Elizabeth">
+        <modifyDataType tableName="t_users"
+                        columnName="img_url"
+                        newDataType="VARCHAR(255)"/>
+    </changeSet>
 </databaseChangeLog>
 
