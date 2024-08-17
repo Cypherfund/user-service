@@ -68,8 +68,7 @@ public class TUser implements Serializable {
     @Column(name = "str_login_provider", length = 15)
     private String strLoginProvider;
 
-    @Size(max = 255)
-    @Column(name = "img_url", length = 100)
+    @Column(name = "img_url")
     private String imgUrl;
 
 }

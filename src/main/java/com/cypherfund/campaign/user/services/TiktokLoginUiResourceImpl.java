@@ -151,6 +151,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
         signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
         signUpRequest.setPassword(signUpRequest.getUsername());
+        log.info("image url: , image length" + tiktokUserResponse.getData().getUser().getAvatar_url(), tiktokUserResponse.getData().getUser().getAvatar_url().length());
+        log.info("display name: " + tiktokUserResponse.getData().getUser().getDisplay_name());
         signUpRequest.setImageUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
 
         //if use already exist in the system, just create another profile for the user
