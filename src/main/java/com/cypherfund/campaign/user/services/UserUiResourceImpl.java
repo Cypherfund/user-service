@@ -3,8 +3,10 @@ package com.cypherfund.campaign.user.services;
 import com.cypherfund.campaign.user.controller.UserUiResource;
 import com.cypherfund.campaign.user.dal.entity.TRoleUser;
 import com.cypherfund.campaign.user.dal.entity.TUser;
+import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
+import com.cypherfund.campaign.user.dto.TProfileDto;
 import com.cypherfund.campaign.user.dto.TUserDto;
 import com.cypherfund.campaign.user.exceptions.NotFoundException;
 import com.cypherfund.campaign.user.model.ApiResponse;
@@ -16,13 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class UserUiResourceImpl implements UserUiResource {
+    private final ModelMapper modelMapper;
     final TUserRepository userRepository;
     final JwtTokenProvider tokenProvider;
+    final TProfileRepository profileRepository;
 
     @Override
     public ResponseEntity<ApiResponse<List<TUserDto>>> getAllUsers(int page, int limit) {
@@ -64,6 +69,14 @@ public class UserUiResourceImpl implements UserUiResource {
                 .orElseThrow(() -> new NotFoundException("user not found"));
 
         return ResponseEntity.ok(new ApiResponse<>(true, "", userDto));
+    }
+
+    @Override
+    public ResponseEntity<?> getUserProfiles(String userId) {
+        List<TProfileDto> profileDto = profileRepository.findByUser_UserId(userId).stream()
+                .map((element) -> modelMapper.map(element, TProfileDto.class))
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>(true, "", profileDto));
     }
 
     private TUserDto mapToUserDto(TUser user) {

@@ -80,8 +80,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         response.addCookie(csrfCookie);
 
         SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setEmail(username);
-        signUpRequest.setUsername(email);
+        signUpRequest.setEmail(email);
+        signUpRequest.setUsername(username);
         signUpRequest.setRedirectUrl(redirectUrl);
 
         redisTemplate.opsForValue().set("TEMP:LOGIN:TIKTOK:"+csrfState, signUpRequest);
@@ -156,6 +156,9 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         log.info("display name: " + tiktokUserResponse.getData().getUser().getDisplay_name());
         signUpRequest.setImageUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
 
+        signUpRequest.setEmail(signUpRequest.getEmail() == null ? "": signUpRequest.getEmail());
+        signUpRequest.setPhone(signUpRequest.getPhone() == null ? "": signUpRequest.getPhone());
+        signUpRequest.setUsername(signUpRequest.getUsername() == null ? "": signUpRequest.getUsername());
         //if use already exist in the system, just create another profile for the user
         Optional<TUser> userOptional = userRepository.findByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
 
@@ -166,6 +169,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
         profile.setAccountId(tiktokUserResponse.getData().getUser().getUnion_id());
         profile.setAccessToken(response.getAccess_token());
+        profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
         profile.setUser(user);
         profile.setDtCreatedAt(Instant.now());
         profileRepository.save(profile);

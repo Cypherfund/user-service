@@ -48,4 +48,8 @@ public class TProfile {
     @Column(name = "dt_created_at", nullable = false)
     private Instant dtCreatedAt;
 
+    @Size(max = 500)
+    @Column(name = "img_url", length = 500)
+    private String imgUrl;
+
 }

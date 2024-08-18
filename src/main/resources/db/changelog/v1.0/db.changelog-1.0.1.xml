@@ -47,5 +47,11 @@
                         columnName="img_url"
                         newDataType="VARCHAR(500)"/>
     </changeSet>
+
+    <changeSet id="add image url to each profile" author="Ngai Elizabeth">
+        <addColumn tableName="t_profile">
+            <column name="img_url" type="varchar(500)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 

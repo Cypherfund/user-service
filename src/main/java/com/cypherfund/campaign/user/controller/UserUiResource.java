@@ -23,4 +23,8 @@ public interface UserUiResource {
 
     @PostMapping("/validate-token")
     ResponseEntity<?> validateToken(@RequestBody String token);
+
+    //get user profiles
+    @GetMapping("/profiles/{userId}")
+    ResponseEntity<?> getUserProfiles(@PathVariable String userId);
 }
