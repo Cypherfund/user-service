@@ -14,6 +14,7 @@ import java.time.Instant;
  */
 @Data
 public class TAccountBalanceDto implements Serializable {
+    private BigDecimal dbCoinBalance;
     Long id;
     @NotNull
     @Size(max = 50)

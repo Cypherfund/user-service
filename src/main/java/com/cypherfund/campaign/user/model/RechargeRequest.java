@@ -14,4 +14,5 @@ public class RechargeRequest {
     private String paymentCode;
     private String extra;
     private double amount;
+    private String callbackUrl;
 }

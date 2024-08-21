@@ -53,5 +53,11 @@
             <column name="img_url" type="varchar(500)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add callback url to user account" author="Ngai Elizabeth">
+        <addColumn tableName="t_trace">
+            <column name="callback_url" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 

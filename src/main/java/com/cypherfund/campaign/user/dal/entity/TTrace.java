@@ -48,4 +48,8 @@ public class TTrace {
     @Column(name = "str_type", length = 15)
     private String strType;
 
+    @Size(max = 255)
+    @Column(name = "callback_url")
+    private String callbackUrl;
+
 }

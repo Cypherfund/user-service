@@ -9,13 +9,22 @@ import com.cypherfund.campaign.user.security.UserPrincipal;
 import com.cypherfund.campaign.user.services.paymentProcess.IPaymentProcess;
 import com.cypherfund.campaign.user.utils.Enumerations;
 import com.cypherfund.campaign.user.utils.ErrorConstants;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -24,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.cypherfund.campaign.user.utils.Enumerations.PAYMENT_STATUS.PENDING;
+import static com.cypherfund.campaign.user.utils.Enumerations.PAYMENT_STATUS.*;
 import static com.cypherfund.campaign.user.utils.Enumerations.TRANSACTION_TYPE.*;
 
 @Slf4j
@@ -39,6 +48,7 @@ public class AccountService {
     private final TTraceStatusRepository traceStatusRepository;
     private final Map<Enumerations.PaymentMethod, IPaymentProcess> paymentProcesses;
     private final CoinService coinService;
+    private final RestTemplate restTemplate;
 
 
     @Transactional
@@ -111,7 +121,7 @@ public class AccountService {
 
         this.createTraceStatus(PENDING.name(), paymentResponse.getTransactionId(), "Payment request sent to payment service", trace.getLgTraceId());
 
-        if (paymentResponse.getStatus().equals(Enumerations.PAYMENT_STATUS.SUCCESS)) {
+        if (paymentResponse.getStatus().equals(SUCCESS)) {
             return updateUserBalance(userId, request.getAmount(), request.getReference(), DEPOSIT);
         } else if (paymentResponse.getStatus().equals(PENDING)){
             log.info("payment response: {}", paymentResponse);
@@ -131,8 +141,10 @@ public class AccountService {
         TTrace trace = traceRepository.findById(traceStatus.getLgTraceId())
                 .orElseThrow(() -> new AppException("Invalid trace id"));
 
-        if (callbackResponse.getStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.SUCCESS.name())) {
-            createTraceStatus(Enumerations.PAYMENT_STATUS.SUCCESS.name(), callbackResponse.getTransactionId(), "Payment successful", trace.getLgTraceId());
+        boolean isPaymentSuccessful = callbackResponse.getStatus().equalsIgnoreCase(SUCCESS.name());
+
+        if (isPaymentSuccessful) {
+            createTraceStatus(SUCCESS.name(), callbackResponse.getTransactionId(), "Payment successful", trace.getLgTraceId());
             String transactionType = trace.getStrType();
             if (transactionType.equalsIgnoreCase(COIN_PURCHASE.name())) {
                 this.coinService.updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), COIN_PURCHASE);
@@ -140,8 +152,33 @@ public class AccountService {
                 updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), DEPOSIT);
             }
         } else {
-            createTraceStatus(Enumerations.PAYMENT_STATUS.FAILED.name(), callbackResponse.getTransactionId(), "Payment failed", trace.getLgTraceId());
+            createTraceStatus(FAILED.name(), callbackResponse.getTransactionId(), "Payment failed", trace.getLgTraceId());
         }
+
+        if (!StringUtils.isBlank(trace.getCallbackUrl())) {
+            sendCallback(callbackResponse, trace, isPaymentSuccessful);
+        }
+    }
+
+    @SneakyThrows
+    private void sendCallback(CallbackResponse callbackResponse, TTrace trace, boolean isPaymentSuccessful) {
+        log.info("Sending callback response: {}", callbackResponse);
+        PaymentResponse response = new PaymentResponse();
+        response.setStatus(isPaymentSuccessful ? SUCCESS : FAILED);
+        response.setTransactionId(trace.getLgTraceId());
+        response.setData(callbackResponse);
+
+        String url = trace.getCallbackUrl();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String jsonResponse = new ObjectMapper().writeValueAsString(response);
+
+        HttpEntity<String> entity = new HttpEntity<>(jsonResponse, headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
+        // Log the status of the response
+        log.info("Callback response status: {}", responseEntity.getStatusCode());
     }
 
     public String checkStatus(String reference) {
@@ -153,11 +190,11 @@ public class AccountService {
                 .findFirst()
                 .orElseThrow(() -> new AppException("Invalid trace id"));
 
-        if (traceStatus.getStrStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.SUCCESS.name())) {
+        if (traceStatus.getStrStatus().equalsIgnoreCase(SUCCESS.name())) {
             updateUserBalance(trace.getLgUserId(), trace.getDbAmount(), trace.getStrOriginatingTransaction(), DEPOSIT);
-            return Enumerations.PAYMENT_STATUS.SUCCESS.name();
-        } else if (traceStatus.getStrStatus().equalsIgnoreCase(Enumerations.PAYMENT_STATUS.FAILED.name())) {
-            return Enumerations.PAYMENT_STATUS.FAILED.name();
+            return SUCCESS.name();
+        } else if (traceStatus.getStrStatus().equalsIgnoreCase(FAILED.name())) {
+            return FAILED.name();
         } else {
             return Enumerations.PAYMENT_STATUS.PENDING.name();
         }
@@ -255,6 +292,7 @@ public class AccountService {
         tTrace.setStrPhoneNumber(request.getExtra());
         tTrace.setStrOriginatingTransaction(request.getReference());
         tTrace.setLgUserId(request.getUserId());
+        tTrace.setCallbackUrl(request.getCallbackUrl());
         tTrace.setStrType(Enumerations.TRANSACTION_TYPE.DEPOSIT.name());
 
         return traceRepository.save(tTrace);
