@@ -20,13 +20,13 @@ public class CoinAccountUiResource {
     CoinService coinService;
 
     @PostMapping("/credit")
-    public ResponseEntity<ApiResponse<String>> creditWinning(
+    public ResponseEntity<ApiResponse<TAccountBalanceDto>> creditWinning(
                                 @RequestParam("amount") double amount,
                                 @RequestParam("userId") String userId,
                                 @RequestParam("reference") String reference) {
         log.info("Crediting coin balance for user: {}", userId);
-        coinService.coinReward( userId, amount, reference);
-        return ResponseEntity.ok(ApiResponse.success("Winning credited successfully", null));
+        TAccountBalanceDto accountBalanceDto = coinService.coinReward( userId, amount, reference);
+        return ResponseEntity.ok(ApiResponse.success("Winning credited successfully", accountBalanceDto));
     }
 
     @PostMapping("/debit")
