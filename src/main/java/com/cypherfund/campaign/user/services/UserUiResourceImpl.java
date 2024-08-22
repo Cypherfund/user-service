@@ -72,7 +72,7 @@ public class UserUiResourceImpl implements UserUiResource {
     }
 
     @Override
-    public ResponseEntity<?> getUserProfiles(String userId) {
+    public ResponseEntity<ApiResponse<List<TProfileDto>>> getUserProfiles(String userId) {
         List<TProfileDto> profileDto = profileRepository.findByUser_UserId(userId).stream()
                 .map((element) -> modelMapper.map(element, TProfileDto.class))
                 .toList();

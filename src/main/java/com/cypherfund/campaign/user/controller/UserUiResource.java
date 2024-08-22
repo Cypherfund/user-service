@@ -1,5 +1,7 @@
 package com.cypherfund.campaign.user.controller;
 
+import com.cypherfund.campaign.user.dto.TProfileDto;
+import com.cypherfund.campaign.user.model.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @RequestMapping("users")
 public interface UserUiResource {
@@ -26,5 +30,5 @@ public interface UserUiResource {
 
     //get user profiles
     @GetMapping("/profiles/{userId}")
-    ResponseEntity<?> getUserProfiles(@PathVariable String userId);
+    ResponseEntity<ApiResponse<List<TProfileDto>>> getUserProfiles(@PathVariable String userId);
 }

@@ -165,7 +165,7 @@ public class AccountService {
         log.info("Sending callback response: {}", callbackResponse);
         PaymentResponse response = new PaymentResponse();
         response.setStatus(isPaymentSuccessful ? SUCCESS : FAILED);
-        response.setTransactionId(trace.getLgTraceId());
+        response.setTransactionId(trace.getStrOriginatingTransaction());
         response.setData(callbackResponse);
 
         String url = trace.getCallbackUrl();
