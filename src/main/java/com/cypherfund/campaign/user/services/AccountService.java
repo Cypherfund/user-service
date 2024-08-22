@@ -225,7 +225,7 @@ public class AccountService {
     }
 
     @Transactional
-    public void debitBalance(DebitRequest debitRequest) {
+    public TAccountBalanceDto debitBalance(DebitRequest debitRequest) {
         log.info("Debiting balance for user: {}", debitRequest.getUserId());
 
         TUser user = tUserRepository.findById(debitRequest.getUserId()).orElseThrow(() -> new AppException("User not found"));
@@ -243,6 +243,8 @@ public class AccountService {
                 debitRequest.getTransactionType(),
                 debitRequest.getAmount(),
                 debitRequest.getReference());
+
+        return modelMapper.map(accountBalance, TAccountBalanceDto.class);
     }
 
 

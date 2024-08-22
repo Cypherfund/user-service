@@ -33,10 +33,10 @@ public class AccountUiResource {
     }
 
     @PostMapping("/play")
-    public ResponseEntity<ApiResponse<String>> play(@RequestBody @Valid DebitRequest debitRequest) {
+    public ResponseEntity<ApiResponse<TAccountBalanceDto>> play(@RequestBody @Valid DebitRequest debitRequest) {
         log.info("Debiting play balance for user: {}", debitRequest.getUserId());
-        accountService.debitBalance( debitRequest);
-        return ResponseEntity.ok(ApiResponse.success("Play debited successfully", null));
+        TAccountBalanceDto  accountBalanceDto = accountService.debitBalance( debitRequest);
+        return ResponseEntity.ok(ApiResponse.success("Play debited successfully", accountBalanceDto));
     }
 
     @PostMapping("/deposit")
