@@ -150,7 +150,7 @@ public class CoinService {
     }
 
     @Transactional
-    public void debitCoinBalance(DebitRequest debitRequest) {
+    public TAccountBalanceDto debitCoinBalance(DebitRequest debitRequest) {
         log.info("Debiting coin balance for user: {}", debitRequest.getUserId());
 
         tUserRepository.findById(debitRequest.getUserId()).orElseThrow(() -> new AppException("User not found"));
@@ -168,6 +168,8 @@ public class CoinService {
                 debitRequest.getTransactionType(),
                 debitRequest.getAmount(),
                 debitRequest.getReference());
+
+        return modelMapper.map(accountBalance, TAccountBalanceDto.class);
     }
 
 

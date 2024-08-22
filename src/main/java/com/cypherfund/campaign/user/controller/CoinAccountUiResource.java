@@ -30,10 +30,10 @@ public class CoinAccountUiResource {
     }
 
     @PostMapping("/debit")
-    public ResponseEntity<ApiResponse<String>> play(@RequestBody @Valid DebitRequest debitRequest) {
+    public ResponseEntity<ApiResponse<TAccountBalanceDto>> play(@RequestBody @Valid DebitRequest debitRequest) {
         log.info("Debiting coin balance for user: {}", debitRequest.getUserId());
-        coinService.debitCoinBalance( debitRequest);
-        return ResponseEntity.ok(ApiResponse.success("Play debited successfully", null));
+        TAccountBalanceDto accountBalanceDto = coinService.debitCoinBalance(debitRequest);
+        return ResponseEntity.ok(ApiResponse.success("Play debited successfully", accountBalanceDto));
     }
 
     @PostMapping("/deposit")
