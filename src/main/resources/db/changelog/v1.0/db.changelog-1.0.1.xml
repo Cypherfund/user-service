@@ -59,5 +59,15 @@
             <column name="callback_url" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="remove_unique_constraint_on_reference" author="Ngai Elizabeth">
+        <dropUniqueConstraint tableName="transactions" constraintName="idx_reference"/>
+    </changeSet>
+
+    <changeSet id="add_unique_constraint_on_reference" author="Ngai Elizabeth">
+        <addUniqueConstraint tableName="transactions" columnNames="reference, user_id, type" constraintName="idx_user_type_reference"/>
+    </changeSet>
+
+
 </databaseChangeLog>
 
