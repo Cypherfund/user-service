@@ -73,10 +73,12 @@ jobs:
               sed -i "s/tag:.*/tag: << pipeline.number >>_${CIRCLE_SHA1}/g" tech-ascend-charts/user-service/values.yaml
               sed -i "s/tag:.*/tag: << pipeline.number >>_${CIRCLE_SHA1}/g" games-charts/user-service/values.yaml
               sed -i "s/tag:.*/tag: << pipeline.number >>_${CIRCLE_SHA1}/g" memraii-charts/user-service/values.yaml
+              sed -i "s/tag:.*/tag: << pipeline.number >>_${CIRCLE_SHA1}/g" social-booster/sub-charts/user-service/values.yaml
               cat tech-ascend-charts/user-service/values.yaml
               git add tech-ascend-charts/user-service/values.yaml
               git add games-charts/user-service/values.yaml
               git add memraii-charts/user-service/values.yaml
+              git add social-booster/sub-charts/user-service/values.yaml
       - run:
           name: Set update particular env
           command: |

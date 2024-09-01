@@ -19,6 +19,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -183,7 +184,10 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
         if (signUpRequest.getRedirectUrl() != null) {
             log.info("Redirecting user to: " + signUpRequest.getRedirectUrl());
-            String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken();
+            String redirectUrl = signUpRequest.getRedirectUrl();
+            if (loginResponse.getBody() != null && !StringUtils.isBlank(loginResponse.getBody().getAccessToken())) {
+                redirectUrl = redirectUrl + "?token=" + loginResponse.getBody().getAccessToken();
+            }
             log.info("Redirect URL: " + redirectUrl);
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(redirectUrl));
