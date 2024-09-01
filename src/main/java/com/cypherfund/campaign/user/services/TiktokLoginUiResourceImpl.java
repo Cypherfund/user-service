@@ -94,7 +94,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Build TikTok authorization URL
         String url = UriComponentsBuilder.fromUriString(authorizationUri)
                 .queryParam("client_key", clientId)
-                .queryParam("scope", "user.info.basic")
+                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats")
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUri.replaceAll("\"", ""))
                 .queryParam("state", csrfState)
@@ -246,6 +246,31 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
                 "&code" + "=" + code +
                 "&grant_type" + "=" + "authorization_code" +
                 "&redirect_uri" + "=" + redirectUri.replaceAll("\"", "");
+
+        RequestBody body = RequestBody.create(urlEncodedBody.getBytes(StandardCharsets.UTF_8));
+
+        Request request = new Request.Builder()
+                .url(tokenUri)
+                .post(body)
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) throw new IOException("Unexpected code " + response);
+            String responseBody = response.body().string();
+            return new Gson().fromJson(responseBody, TiktokTokenResponse.class);
+        }
+
+    }
+
+    public TiktokTokenResponse refreshToken(String refreshToken) throws Exception {
+        OkHttpClient client = new OkHttpClient();
+
+        String urlEncodedBody =
+                "client_key" + "=" + clientId +
+                        "&client_secret" + "=" + clientSecret +
+                        "&grant_type" + "=" + "refresh_token" +
+                        "&refresh_token" + "=" + refreshToken;
 
         RequestBody body = RequestBody.create(urlEncodedBody.getBytes(StandardCharsets.UTF_8));
 
