@@ -10,4 +10,8 @@ public class TiktokTokenResponse {
     private String error;
     private String error_description;
     private String log_id;
+    private String scope;
+    private String refresh_token;
+    private int refresh_expires_in;
+    private String open_id;
 }

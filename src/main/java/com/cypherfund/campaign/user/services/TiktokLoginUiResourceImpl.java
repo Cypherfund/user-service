@@ -2,8 +2,10 @@ package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.controller.TiktokLoginUiResource;
 import com.cypherfund.campaign.user.dal.entity.TProfile;
+import com.cypherfund.campaign.user.dal.entity.TTiktokLogin;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
+import com.cypherfund.campaign.user.dal.repository.TTiktokLoginRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
 import com.cypherfund.campaign.user.model.*;
@@ -65,6 +67,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
     private final TUserRepository userRepository;
+    private final TTiktokLoginRepository tiktokLoginRepository;
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
@@ -141,9 +144,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUnion_id(), tiktok);
         //if a profile exist with this user simply log the user in
         if (profileOptional.isPresent()) {
-            profileOptional.get().setAccessToken(response.getAccess_token());
-            profileRepository.save(profileOptional.get());
-
+            createTiktokLogin(response, profileOptional.get().getUser().getUserId());
             log.info("User already exists, logging in");
 
             ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
@@ -169,11 +170,12 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profile.setSocialMediaAccount(tiktok);
         profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
         profile.setAccountId(tiktokUserResponse.getData().getUser().getUnion_id());
-        profile.setAccessToken(response.getAccess_token());
         profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
         profile.setUser(user);
         profile.setDtCreatedAt(Instant.now());
         profileRepository.save(profile);
+
+        createTiktokLogin(response, user.getUserId());
 
         ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
 
@@ -259,5 +261,20 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             return new Gson().fromJson(responseBody, TiktokTokenResponse.class);
         }
 
+    }
+
+    public void createTiktokLogin(TiktokTokenResponse response, String userId) {
+        TTiktokLogin tTiktokLogin = new TTiktokLogin();
+        tTiktokLogin.setDtCreatedAt(Instant.now());
+        tTiktokLogin.setExpiresIn(response.getExpires_in());
+        tTiktokLogin.setScope(response.getScope());
+        tTiktokLogin.setOpenId(response.getOpen_id());
+        tTiktokLogin.setAccessToken(response.getAccess_token());
+        tTiktokLogin.setRefreshToken(response.getRefresh_token());
+        tTiktokLogin.setRefreshExpiresIn(response.getRefresh_expires_in());
+        tTiktokLogin.setTokenType(response.getToken_type());
+        tTiktokLogin.setUserId(userId);
+
+        tiktokLoginRepository.save(tTiktokLogin);
     }
 }
