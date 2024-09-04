@@ -131,7 +131,6 @@ public class AccountService {
         }
     }
 
-    @Transactional
     public void processCallback(CallbackResponse callbackResponse) {
         TTraceStatus traceStatus = traceStatusRepository.findByStrExternalTransaction(callbackResponse.getTransactionId())
                 .stream()
@@ -143,6 +142,15 @@ public class AccountService {
 
         boolean isPaymentSuccessful = callbackResponse.getStatus().equalsIgnoreCase(SUCCESS.name());
 
+        parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
+
+        if (!StringUtils.isBlank(trace.getCallbackUrl())) {
+            sendCallback(callbackResponse, trace, isPaymentSuccessful);
+        }
+    }
+
+    @Transactional
+    public void parseCallbackResponse(CallbackResponse callbackResponse, TTrace trace, boolean isPaymentSuccessful) {
         if (isPaymentSuccessful) {
             createTraceStatus(SUCCESS.name(), callbackResponse.getTransactionId(), "Payment successful", trace.getLgTraceId());
             String transactionType = trace.getStrType();
@@ -153,10 +161,6 @@ public class AccountService {
             }
         } else {
             createTraceStatus(FAILED.name(), callbackResponse.getTransactionId(), "Payment failed", trace.getLgTraceId());
-        }
-
-        if (!StringUtils.isBlank(trace.getCallbackUrl())) {
-            sendCallback(callbackResponse, trace, isPaymentSuccessful);
         }
     }
 

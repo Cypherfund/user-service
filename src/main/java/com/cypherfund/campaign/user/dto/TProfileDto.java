@@ -17,7 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class TProfileDto implements Serializable {
     Integer id;
-    String userUserId;
+    private String userUserId;
     @NotNull
     Enumerations.SOCIAL_MEDIA_PLATFORM socialMediaAccount;
     @NotNull

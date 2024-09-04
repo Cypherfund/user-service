@@ -2,8 +2,10 @@ package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.controller.TiktokLoginUiResource;
 import com.cypherfund.campaign.user.dal.entity.TProfile;
+import com.cypherfund.campaign.user.dal.entity.TTiktokLogin;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
+import com.cypherfund.campaign.user.dal.repository.TTiktokLoginRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
 import com.cypherfund.campaign.user.model.*;
@@ -19,6 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -64,6 +67,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private final RedisTemplate<String, Object> redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
     private final TUserRepository userRepository;
+    private final TTiktokLoginRepository tiktokLoginRepository;
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
@@ -90,7 +94,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Build TikTok authorization URL
         String url = UriComponentsBuilder.fromUriString(authorizationUri)
                 .queryParam("client_key", clientId)
-                .queryParam("scope", "user.info.basic")
+                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats")
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUri.replaceAll("\"", ""))
                 .queryParam("state", csrfState)
@@ -140,9 +144,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUnion_id(), tiktok);
         //if a profile exist with this user simply log the user in
         if (profileOptional.isPresent()) {
-            profileOptional.get().setAccessToken(response.getAccess_token());
-            profileRepository.save(profileOptional.get());
-
+            createTiktokLogin(response, profileOptional.get().getUser().getUserId());
             log.info("User already exists, logging in");
 
             ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
@@ -168,11 +170,12 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profile.setSocialMediaAccount(tiktok);
         profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
         profile.setAccountId(tiktokUserResponse.getData().getUser().getUnion_id());
-        profile.setAccessToken(response.getAccess_token());
         profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
         profile.setUser(user);
         profile.setDtCreatedAt(Instant.now());
         profileRepository.save(profile);
+
+        createTiktokLogin(response, user.getUserId());
 
         ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
 
@@ -183,7 +186,10 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
         if (signUpRequest.getRedirectUrl() != null) {
             log.info("Redirecting user to: " + signUpRequest.getRedirectUrl());
-            String redirectUrl = signUpRequest.getRedirectUrl() + "?token=" + Objects.requireNonNull(loginResponse.getBody()).getAccessToken();
+            String redirectUrl = signUpRequest.getRedirectUrl();
+            if (loginResponse.getBody() != null && !StringUtils.isBlank(loginResponse.getBody().getAccessToken())) {
+                redirectUrl = redirectUrl + "?token=" + loginResponse.getBody().getAccessToken();
+            }
             log.info("Redirect URL: " + redirectUrl);
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(redirectUrl));
@@ -255,5 +261,45 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             return new Gson().fromJson(responseBody, TiktokTokenResponse.class);
         }
 
+    }
+
+    public TiktokTokenResponse refreshToken(String refreshToken) throws Exception {
+        OkHttpClient client = new OkHttpClient();
+
+        String urlEncodedBody =
+                "client_key" + "=" + clientId +
+                        "&client_secret" + "=" + clientSecret +
+                        "&grant_type" + "=" + "refresh_token" +
+                        "&refresh_token" + "=" + refreshToken;
+
+        RequestBody body = RequestBody.create(urlEncodedBody.getBytes(StandardCharsets.UTF_8));
+
+        Request request = new Request.Builder()
+                .url(tokenUri)
+                .post(body)
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) throw new IOException("Unexpected code " + response);
+            String responseBody = response.body().string();
+            return new Gson().fromJson(responseBody, TiktokTokenResponse.class);
+        }
+
+    }
+
+    public void createTiktokLogin(TiktokTokenResponse response, String userId) {
+        TTiktokLogin tTiktokLogin = new TTiktokLogin();
+        tTiktokLogin.setDtCreatedAt(Instant.now());
+        tTiktokLogin.setExpiresIn(response.getExpires_in());
+        tTiktokLogin.setScope(response.getScope());
+        tTiktokLogin.setOpenId(response.getOpen_id());
+        tTiktokLogin.setAccessToken(response.getAccess_token());
+        tTiktokLogin.setRefreshToken(response.getRefresh_token());
+        tTiktokLogin.setRefreshExpiresIn(response.getRefresh_expires_in());
+        tTiktokLogin.setTokenType(response.getToken_type());
+        tTiktokLogin.setUserId(userId);
+
+        tiktokLoginRepository.save(tTiktokLogin);
     }
 }

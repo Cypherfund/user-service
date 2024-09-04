@@ -39,11 +39,6 @@ public class TProfile {
     @Column(name = "account_id", nullable = false, length = 100)
     private String accountId;
 
-    @Size(max = 255)
-    @NotNull
-    @Column(name = "access_token", nullable = false)
-    private String accessToken;
-
     @NotNull
     @Column(name = "dt_created_at", nullable = false)
     private Instant dtCreatedAt;

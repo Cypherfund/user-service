@@ -59,5 +59,57 @@
             <column name="callback_url" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="remove_unique_constraint_on_reference" author="Ngai Elizabeth">
+        <dropUniqueConstraint tableName="transactions" constraintName="idx_reference"/>
+    </changeSet>
+
+    <changeSet id="add_unique_constraint_on_reference" author="Ngai Elizabeth">
+        <addUniqueConstraint tableName="transactions" columnNames="reference, user_id, type" constraintName="idx_user_type_reference"/>
+    </changeSet>
+
+    <changeSet id="create tiktok login table" author="Ngai Elizabeth">
+        <createTable tableName="t_tiktok_login">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="access_token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires_in" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refresh_expires_in" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refresh_token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="scope" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dt_created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="remove access token column from t_profile" author="Ngai Elizabeth">
+        <dropColumn tableName="t_profile" columnName="access_token"/>
+    </changeSet>
+
+    <changeSet id="add user id to t_tiktok_login" author="Ngai Elizabeth">
+        <addColumn tableName="t_tiktok_login">
+            <column name="user_id" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>
 

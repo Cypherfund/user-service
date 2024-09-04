@@ -160,7 +160,7 @@ public class CoinService {
         if (accountBalance.getDbCoinBalance().compareTo(BigDecimal.valueOf(debitRequest.getAmount())) < 0)
             throw new AppException("Insufficient balance");
 
-        accountBalance.setDCurBalance(accountBalance.getDCurBalance().subtract(BigDecimal.valueOf(debitRequest.getAmount())));
+        accountBalance.setDbCoinBalance(accountBalance.getDbCoinBalance().subtract(BigDecimal.valueOf(debitRequest.getAmount())));
 
         tAccountBalanceRepository.save(accountBalance);
 
