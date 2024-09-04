@@ -6,10 +6,7 @@ import com.cypherfund.campaign.user.services.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Author: E.Ngai
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Time: 1:55 PM
  **/
 @Slf4j
+@RestController
 @RequestMapping("/locations")
 @RequiredArgsConstructor
 public class LocationController {
@@ -27,11 +25,10 @@ public class LocationController {
         return ResponseEntity.ok(new ApiResponse<>(true, "", locationService.getLocation(ipAddress)));
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<ApiResponse<LocationResponse>> getLocationWithoutIp(@RequestHeader("X-Forwarded-For") String ipAddress){
         log.info("IP Address from X-Forwarded-For: {}", ipAddress);
         return ResponseEntity.ok(new ApiResponse<>(true, "", locationService.getLocation(ipAddress)));
     }
-
 
 }
