@@ -41,6 +41,9 @@ public class LocationController {
         }
 
         log.info("IP Address: {}", ipAddress);
+        if (ipAddress.equals("127.0.0.1")) {
+            return ResponseEntity.ok(new ApiResponse<>(true, "", null));
+        }
         return ResponseEntity.ok(new ApiResponse<>(true, "", locationService.getLocation(ipAddress)));
     }
 
