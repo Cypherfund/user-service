@@ -290,9 +290,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     private TiktokVideoListResponse getTiktokUserLatestVideos(String token) {
         VideoListRequest videoListRequest = new VideoListRequest(5);
-        String fields = "cover_image_url";
-        TiktokVideoListResponse videoList = tikTokFeignClient.getVideoList(token, fields, videoListRequest);
-        return videoList;
+        String fields = "cover_image_url,id,title,embed_link,like_count,comment_count,share_count,view_count";
+        return tikTokFeignClient.getVideoList("Bearer " + token, fields, videoListRequest);
     }
 
     @Override
@@ -330,8 +329,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         TikTokVideoFilter filters = new TikTokVideoFilter();
         filters.setFilters(videoFilter);
         String fields = "cover_image_url,id,title,embed_html,embed_link,like_count,comment_count,share_count,view_count,share_url";
-        TiktokVideoListResponse videoList = tikTokFeignClient.queryVideoList(token, fields, filters);
-        return videoList;
+        return tikTokFeignClient.queryVideoList("Bearer " + token, fields, filters);
     }
 
 

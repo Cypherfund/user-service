@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "tiktokClient", url = "https://open.tiktokapis.com")
 public interface TikTokFeignClient {
 
-    @PostMapping(value = "/v2/video/list/", consumes = "application/json")
+    @PostMapping(value = "/v2/video/list/", consumes = "application/json", produces = "application/json")
     TiktokVideoListResponse getVideoList(@RequestHeader("Authorization") String authorization,
                                          @RequestParam("fields") String fields,
                                          @RequestBody VideoListRequest request);
 
-    @PostMapping(value = "/v2/video/query/", consumes = "application/json")
+    @PostMapping(value = "/v2/video/query/", consumes = "application/json", produces = "application/json")
     TiktokVideoListResponse queryVideoList(@RequestHeader("Authorization") String authorization,
                                            @RequestParam("fields") String fields,
                                            @RequestBody TikTokVideoFilter request);
