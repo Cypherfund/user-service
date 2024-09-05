@@ -2,9 +2,9 @@ package com.cypherfund.campaign.user.proxies;
 
 
 import com.cypherfund.campaign.user.model.ApiResponse;
-import com.cypherfund.campaign.user.model.CryptoPaymentRequest;
-import com.cypherfund.campaign.user.model.MobilePaymentRequest;
-import com.cypherfund.campaign.user.model.PaymentResponse;
+import com.cypherfund.campaign.user.model.payment.CryptoPaymentRequest;
+import com.cypherfund.campaign.user.model.payment.MobilePaymentRequest;
+import com.cypherfund.campaign.user.model.payment.PaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

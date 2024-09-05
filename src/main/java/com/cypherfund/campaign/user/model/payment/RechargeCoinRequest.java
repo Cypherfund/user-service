@@ -1,4 +1,4 @@
-package com.cypherfund.campaign.user.model;
+package com.cypherfund.campaign.user.model.payment;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

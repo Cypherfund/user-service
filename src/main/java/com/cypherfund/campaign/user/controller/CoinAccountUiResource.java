@@ -2,9 +2,8 @@ package com.cypherfund.campaign.user.controller;
 
 import com.cypherfund.campaign.user.dto.TAccountBalanceDto;
 import com.cypherfund.campaign.user.model.ApiResponse;
-import com.cypherfund.campaign.user.model.DebitRequest;
-import com.cypherfund.campaign.user.model.RechargeCoinRequest;
-import com.cypherfund.campaign.user.model.RechargeRequest;
+import com.cypherfund.campaign.user.model.payment.DebitRequest;
+import com.cypherfund.campaign.user.model.payment.RechargeCoinRequest;
 import com.cypherfund.campaign.user.services.CoinService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

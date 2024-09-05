@@ -1,4 +1,4 @@
-package com.cypherfund.campaign.user.model;
+package com.cypherfund.campaign.user.model.tiktok;
 
 import lombok.Data;
 

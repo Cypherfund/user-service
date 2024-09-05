@@ -8,9 +8,13 @@ import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
 import com.cypherfund.campaign.user.dal.repository.TTiktokLoginRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
 import com.cypherfund.campaign.user.dto.Enumerations;
+import com.cypherfund.campaign.user.exceptions.AppException;
 import com.cypherfund.campaign.user.model.*;
+import com.cypherfund.campaign.user.model.tiktok.*;
+import com.cypherfund.campaign.user.proxies.TikTokFeignClient;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import com.cypherfund.campaign.user.security.UserPrincipal;
+import com.cypherfund.campaign.user.utils.ErrorConstants;
 import com.google.gson.Gson;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,11 +37,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +70,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     private final JwtTokenProvider jwtTokenProvider;
     private final TUserRepository userRepository;
     private final TTiktokLoginRepository tiktokLoginRepository;
+
+    private final TikTokFeignClient tikTokFeignClient;
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
@@ -144,8 +148,11 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUnion_id(), tiktok);
         //if a profile exist with this user simply log the user in
         if (profileOptional.isPresent()) {
-            createTiktokLogin(response, profileOptional.get().getUser().getUserId());
+            String userId = profileOptional.get().getUser().getUserId();
+            createTiktokLogin(response, userId);
             log.info("User already exists, logging in");
+
+            cacheUserToken(response.getAccess_token(), userId, response.getExpires_in());
 
             ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
 
@@ -176,11 +183,18 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         profileRepository.save(profile);
 
         createTiktokLogin(response, user.getUserId());
+        cacheUserToken(response.getAccess_token(), user.getUserId(), response.getExpires_in());
+
 
         ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
 
         return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
 
+    }
+
+    private void cacheUserToken(String token, String userId, int expiresIn) {
+        redisTemplate.opsForValue().set("TIKTOK:TOKEN:"+ userId, token);
+        redisTemplate.expire("TIKTOK:TOKEN:"+ userId, expiresIn, TimeUnit.SECONDS);
     }
 
     private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
@@ -214,6 +228,113 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     }
 
+    @Override
+    public ResponseEntity<TiktokUserResponse> getTiktokUserInfo(String userId) {
+        /// get the user token from redis if present else call refresh token
+        String token = (String) redisTemplate.opsForValue().get("TIKTOK:TOKEN:"+ userId);
+
+        if (StringUtils.isNotBlank(token)) {
+            return ResponseEntity.ok(getUserInfo(token));
+        }
+
+        Optional<TTiktokLogin> tiktokLoginOptional = tiktokLoginRepository.findFirstByUserIdOrderByDtCreatedAtDesc(userId);
+        if (tiktokLoginOptional.isEmpty()) {
+            log.error("User does not have a TikTok login");
+            ErrorConstants.ErrorConstantsEnum errorConstantsEnum = ErrorConstants.ErrorConstantsEnum.NOT_FOUND;
+            errorConstantsEnum.setMessage("User does not have a TikTok login. Please login again");
+            throw new AppException(errorConstantsEnum);
+        }
+
+        TTiktokLogin tiktokLogin = tiktokLoginOptional.get();
+        try {
+            TiktokTokenResponse response = refreshToken(tiktokLogin.getRefreshToken());
+            token = response.getAccess_token();
+            cacheUserToken(token, userId, response.getExpires_in());
+        } catch (Exception e) {
+            log.error("Failed to refresh token", e);
+            throw new AppException("Failed to refresh token");
+        }
+
+        return ResponseEntity.ok(getUserInfo(token));
+    }
+
+    @Override
+    @SneakyThrows
+    public ResponseEntity<TiktokVideoListResponse> getTiktokUserVideos(String userId) {
+        /// get the user token from redis if present else call refresh token
+        String token = (String) redisTemplate.opsForValue().get("TIKTOK:TOKEN:"+ userId);
+
+        if (StringUtils.isNotBlank(token)) {
+            TiktokVideoListResponse videoList = getTiktokUserLatestVideos(token);
+            return ResponseEntity.ok(videoList);
+        }
+
+        Optional<TTiktokLogin> tiktokLoginOptional = tiktokLoginRepository.findFirstByUserIdOrderByDtCreatedAtDesc(userId);
+
+        if (tiktokLoginOptional.isEmpty()) {
+            log.error("User does not have a TikTok login");
+            ErrorConstants.ErrorConstantsEnum errorConstantsEnum = ErrorConstants.ErrorConstantsEnum.NOT_FOUND;
+            errorConstantsEnum.setMessage("User does not have a TikTok login. Please login again");
+            throw new AppException(errorConstantsEnum);
+        }
+
+        TTiktokLogin tiktokLogin = tiktokLoginOptional.get();
+        TiktokTokenResponse response = refreshToken(tiktokLogin.getRefreshToken());
+        token = response.getAccess_token();
+        cacheUserToken(token, userId, response.getExpires_in());
+
+        TiktokVideoListResponse videoList = getTiktokUserLatestVideos(token);
+        return ResponseEntity.ok(videoList);
+
+    }
+
+    private TiktokVideoListResponse getTiktokUserLatestVideos(String token) {
+        VideoListRequest videoListRequest = new VideoListRequest(5);
+        String fields = "cover_image_url,id,title";
+        TiktokVideoListResponse videoList = tikTokFeignClient.getVideoList(token, fields, videoListRequest);
+        return videoList;
+    }
+
+    @Override
+    @SneakyThrows
+    public ResponseEntity<TiktokVideoListResponse> queryTiktokUserVideos(String userId, String[] videoIds) {
+        /// get the user token from redis if present else call refresh token
+        String token = (String) redisTemplate.opsForValue().get("TIKTOK:TOKEN:"+ userId);
+
+        if (StringUtils.isNotBlank(token)) {
+            TiktokVideoListResponse videoList = queryTiktokVideo(videoIds, token);
+            return ResponseEntity.ok(videoList);
+        }
+
+        Optional<TTiktokLogin> tiktokLoginOptional = tiktokLoginRepository.findFirstByUserIdOrderByDtCreatedAtDesc(userId);
+
+        if (tiktokLoginOptional.isEmpty()) {
+            log.error("User does not have a TikTok login");
+            ErrorConstants.ErrorConstantsEnum errorConstantsEnum = ErrorConstants.ErrorConstantsEnum.NOT_FOUND;
+            errorConstantsEnum.setMessage("User does not have a TikTok login. Please login again");
+            throw new AppException(errorConstantsEnum);
+        }
+
+        TTiktokLogin tiktokLogin = tiktokLoginOptional.get();
+        TiktokTokenResponse response = refreshToken(tiktokLogin.getRefreshToken());
+        token = response.getAccess_token();
+        cacheUserToken(token, userId, response.getExpires_in());
+
+        TiktokVideoListResponse videoList = queryTiktokVideo(videoIds, token);
+        return ResponseEntity.ok(videoList);
+    }
+
+    private TiktokVideoListResponse queryTiktokVideo(String[] videoIds, String token) {
+        TikTokVideoFilter.VideoFilter videoFilter = new TikTokVideoFilter.VideoFilter();
+        videoFilter.setVideo_ids(videoIds);
+        TikTokVideoFilter filters = new TikTokVideoFilter();
+        filters.setFilters(videoFilter);
+        String fields = "cover_image_url,id,title,embed_html,embed_link,like_count,comment_count,share_count,view_count,share_url";
+        TiktokVideoListResponse videoList = tikTokFeignClient.queryVideoList(token, fields, filters);
+        return videoList;
+    }
+
+
     public TiktokUserResponse getUserInfo(String accessToken) {
         // Set up the headers with the access token
         HttpHeaders headers = new HttpHeaders();
@@ -225,7 +346,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Use RestTemplate to make the API call
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<TiktokUserResponse> response = restTemplate.exchange(
-                userInfoUri + "?fields=open_id,union_id,avatar_url, display_name",
+                userInfoUri + "?fields=open_id,union_id,avatar_url, display_name, bio_description, profile_deep_link, is_verified, username, follower_count, following_count, likes_count, video_count",
                 HttpMethod.GET,
                 entity,
                 TiktokUserResponse.class
