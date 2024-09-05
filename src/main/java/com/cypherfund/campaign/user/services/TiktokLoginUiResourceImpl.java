@@ -98,7 +98,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Build TikTok authorization URL
         String url = UriComponentsBuilder.fromUriString(authorizationUri)
                 .queryParam("client_key", clientId)
-                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats, video.list")
+                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats,video.list")
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUri.replaceAll("\"", ""))
                 .queryParam("state", csrfState)
