@@ -11,6 +11,4 @@ public interface TProfileRepository extends JpaRepository<TProfile, Integer> {
     Optional<TProfile> findByAccountIdAndSocialMediaAccount(String accountId, Enumerations.SOCIAL_MEDIA_PLATFORM socialMediaAccount);
 
     List<TProfile> findByUser_UserId(String userId);
-
-    Optional<TProfile> findByUserIdAndSocialMediaAccount(String userId, Enumerations.SOCIAL_MEDIA_PLATFORM socialMediaPlatform);
 }

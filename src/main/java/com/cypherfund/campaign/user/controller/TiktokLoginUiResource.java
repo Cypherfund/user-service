@@ -31,11 +31,11 @@ public interface TiktokLoginUiResource {
 
     // New endpoint to get TikTok user profile information
     @GetMapping("/tiktok/user/info")
-    ResponseEntity<TiktokUserResponse> getTiktokUserInfo(@RequestParam String openId);
+    ResponseEntity<TiktokUserResponse> getTiktokUserInfo(@RequestParam String userId);
 
     // New endpoint to get TikTok user's recent videos
     @GetMapping("/tiktok/user/videos")
-    ResponseEntity<TiktokVideoListResponse> getTiktokUserVideos(@RequestParam String openId);
+    ResponseEntity<TiktokVideoListResponse> getTiktokUserVideos(@RequestParam String userId);
 
     // New endpoint to query TikTok user's videos by video IDs
     @GetMapping("/tiktok/user/videos/query")
