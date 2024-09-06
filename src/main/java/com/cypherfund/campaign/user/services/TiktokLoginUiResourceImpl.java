@@ -98,7 +98,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Build TikTok authorization URL
         String url = UriComponentsBuilder.fromUriString(authorizationUri)
                 .queryParam("client_key", clientId)
-                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats")
+                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats,video.list")
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUri.replaceAll("\"", ""))
                 .queryParam("state", csrfState)
@@ -290,9 +290,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     private TiktokVideoListResponse getTiktokUserLatestVideos(String token) {
         VideoListRequest videoListRequest = new VideoListRequest(5);
-        String fields = "cover_image_url,id,title";
-        TiktokVideoListResponse videoList = tikTokFeignClient.getVideoList(token, fields, videoListRequest);
-        return videoList;
+        String fields = "cover_image_url,id,title,like_count,comment_count,share_url";
+        return tikTokFeignClient.getVideoList("Bearer " + token, fields, videoListRequest);
     }
 
     @Override
@@ -330,8 +329,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         TikTokVideoFilter filters = new TikTokVideoFilter();
         filters.setFilters(videoFilter);
         String fields = "cover_image_url,id,title,embed_html,embed_link,like_count,comment_count,share_count,view_count,share_url";
-        TiktokVideoListResponse videoList = tikTokFeignClient.queryVideoList(token, fields, filters);
-        return videoList;
+        return tikTokFeignClient.queryVideoList("Bearer " + token, fields, filters);
     }
 
 

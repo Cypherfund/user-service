@@ -28,12 +28,11 @@ public class TiktokVideoListResponse {
         private String title;
         private String embed_html;
         private String embed_link;
+        private String share_url;
         private int like_count;
         private int comment_count;
         private int share_count;
         private long view_count;
-        private long share_url;
-
     }
 
 }
