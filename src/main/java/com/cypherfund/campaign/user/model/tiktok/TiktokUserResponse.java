@@ -20,12 +20,12 @@ public class TiktokUserResponse {
         private String display_name;
         private String bio_description;
         private String profile_deep_link;
-        private String is_verified;
+        private boolean is_verified;
         private String username;
-        private String follower_count;
-        private String following_count;
-        private String likes_count;
-        private String video_count;
+        private int follower_count;
+        private int following_count;
+        private int likes_count;
+        private int video_count;
 
     }
 }
