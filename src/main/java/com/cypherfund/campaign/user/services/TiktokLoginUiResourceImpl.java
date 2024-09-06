@@ -290,7 +290,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     private TiktokVideoListResponse getTiktokUserLatestVideos(String token) {
         VideoListRequest videoListRequest = new VideoListRequest(5);
-        String fields = "cover_image_url,id,title,embed_link,like_count,comment_count,share_count,view_count";
+        String fields = "cover_image_url,id,title,like_count,comment_count,share_url";
         return tikTokFeignClient.getVideoList("Bearer " + token, fields, videoListRequest);
     }
 
