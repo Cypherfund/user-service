@@ -147,7 +147,8 @@ public class AccountService {
         parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
 
         if (!StringUtils.isBlank(trace.getCallbackUrl())) {
-            sendCallback(callbackResponse, trace, isPaymentSuccessful);
+            //execute in another thread
+            new Thread(() -> sendCallback(callbackResponse, trace, isPaymentSuccessful)).start();
         }
     }
 
