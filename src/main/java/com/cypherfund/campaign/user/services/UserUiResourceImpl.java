@@ -1,7 +1,6 @@
 package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.controller.UserUiResource;
-import com.cypherfund.campaign.user.dal.entity.TRoleUser;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TProfileRepository;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -48,7 +46,7 @@ public class UserUiResourceImpl implements UserUiResource {
 
     @Override
     public ResponseEntity<ApiResponse<TUserDto>> getUser(String username) {
-        TUserDto userDto = userRepository.findByUsernameOrEmailOrPhone(username, username, username)
+        TUserDto userDto = userRepository.findFirstByUsernameOrEmailOrPhone(username, username, username)
                 .map(this::mapToUserDto)
                 .orElseThrow(() -> new NotFoundException("user not found"));
         return  ResponseEntity.ok(new ApiResponse<>(true, "", userDto));

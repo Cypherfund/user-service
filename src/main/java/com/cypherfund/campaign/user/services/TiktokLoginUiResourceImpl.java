@@ -98,7 +98,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         // Build TikTok authorization URL
         String url = UriComponentsBuilder.fromUriString(authorizationUri)
                 .queryParam("client_key", clientId)
-                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats,video.list")
+                .queryParam("scope", "user.info.basic,user.info.profile,user.info.stats,video.list,research.data.basic")
                 .queryParam("response_type", "code")
                 .queryParam("redirect_uri", redirectUri.replaceAll("\"", ""))
                 .queryParam("state", csrfState)
@@ -169,7 +169,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         signUpRequest.setPhone(signUpRequest.getPhone() == null ? "": signUpRequest.getPhone());
         signUpRequest.setUsername(signUpRequest.getUsername() == null ? "": signUpRequest.getUsername());
         //if use already exist in the system, just create another profile for the user
-        Optional<TUser> userOptional = userRepository.findByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
+        Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
 
         TUser user = userOptional.orElse(loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok));
 
