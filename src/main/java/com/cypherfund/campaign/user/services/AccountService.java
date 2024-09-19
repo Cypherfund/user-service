@@ -240,7 +240,7 @@ public class AccountService {
                 .orElseThrow(() -> new AppException("Account balance not found"));
 
         if (accountBalance.getDCurBalance().compareTo(BigDecimal.valueOf(debitRequest.getAmount())) < 0)
-            throw new AppException("Insufficient balance");
+            throw new RuntimeException("Insufficient balance");
 
         accountBalance.setDCurBalance(accountBalance.getDCurBalance().subtract(BigDecimal.valueOf(debitRequest.getAmount())));
 
