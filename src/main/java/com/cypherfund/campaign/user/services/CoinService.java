@@ -55,6 +55,9 @@ public class CoinService {
             return tAccountBalanceRepository.save(newAccountBalance);
         });
 
+        if (accountBalance.getDbCoinBalance() == null)
+            accountBalance.setDbCoinBalance(BigDecimal.ZERO);
+
         accountBalance.setDbCoinBalance(accountBalance.getDbCoinBalance().add(BigDecimal.valueOf(amount)));
 
         tAccountBalanceRepository.save(accountBalance);
