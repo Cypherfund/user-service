@@ -145,7 +145,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         TiktokUserResponse tiktokUserResponse = getUserInfo(response.getAccess_token());
         log.info("User info: " + tiktokUserResponse);
 
-        Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUnion_id(), tiktok);
+        Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUsername(), tiktok);
         //if a profile exist with this user simply log the user in
         if (profileOptional.isPresent()) {
             String userId = profileOptional.get().getUser().getUserId();
