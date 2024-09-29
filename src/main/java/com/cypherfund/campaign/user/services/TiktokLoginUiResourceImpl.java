@@ -176,7 +176,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             TProfile profile = new TProfile();
             profile.setSocialMediaAccount(tiktok);
             profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
-            profile.setAccountId(tiktokUserResponse.getData().getUser().getUnion_id());
+            profile.setAccountId(tiktokUserResponse.getData().getUser().getUsername());
             profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
             profile.setUser(user);
             profile.setDtCreatedAt(Instant.now());
