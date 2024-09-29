@@ -75,8 +75,6 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
-                                                                         String username,
-                                                                         String email,
                                                                          String redirectUrl) {
         // Generate CSRF state token
         String csrfState = UUID.randomUUID().toString();
@@ -88,8 +86,6 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         response.addCookie(csrfCookie);
 
         SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setEmail(email);
-        signUpRequest.setUsername(username);
         signUpRequest.setRedirectUrl(redirectUrl);
 
         redisTemplate.opsForValue().set("TEMP:LOGIN:TIKTOK:"+csrfState, signUpRequest);
@@ -159,17 +155,20 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
             return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
         }
 
+        String password = tiktokUserResponse.getData().getUser().getUsername();
+        String username = "@" + tiktokUserResponse.getData().getUser().getUsername();
+        String email = tiktokUserResponse.getData().getUser().getUsername() + "@tiktok.com";
+
         signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
-        signUpRequest.setPassword(signUpRequest.getUsername());
+        signUpRequest.setPassword(password);
         log.info("image url: , image length" + tiktokUserResponse.getData().getUser().getAvatar_url(), tiktokUserResponse.getData().getUser().getAvatar_url().length());
         log.info("display name: " + tiktokUserResponse.getData().getUser().getDisplay_name());
         signUpRequest.setImageUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
 
-        signUpRequest.setEmail(signUpRequest.getEmail() == null ? "": signUpRequest.getEmail());
-        signUpRequest.setPhone(signUpRequest.getPhone() == null ? "": signUpRequest.getPhone());
-        signUpRequest.setUsername(signUpRequest.getUsername() == null ? "": signUpRequest.getUsername());
+        signUpRequest.setEmail(email);
+        signUpRequest.setUsername(username);
         //if use already exist in the system, just create another profile for the user
-        Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
+        Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmail(username, email);
 
         TUser user = userOptional.orElse(loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok));
 
