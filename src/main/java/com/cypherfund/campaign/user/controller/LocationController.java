@@ -22,7 +22,9 @@ public class LocationController {
     private final LocationService locationService;
 
     @GetMapping("/{ipAddress}")
-    public ResponseEntity<ApiResponse<LocationResponse>> getLocation(@PathVariable String ipAddress) {
+    public ResponseEntity<ApiResponse<LocationResponse>> getLocation(@PathVariable String ipAddress,
+                                                                     @RequestHeader(value = "X-Forwarded-For", required = false) String xForwardedFor) {
+        log.info("X-Forwarded-For: {}", xForwardedFor);
         return ResponseEntity.ok(new ApiResponse<>(true, "", locationService.getLocation(ipAddress)));
     }
 
