@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface TUserRepository extends JpaRepository<TUser, String> {
     Optional<TUser> findFirstByUsernameOrEmailOrPhone(String username, String email, String phone);
+    Optional<TUser> findFirstByUsernameOrEmail(String username, String email);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);

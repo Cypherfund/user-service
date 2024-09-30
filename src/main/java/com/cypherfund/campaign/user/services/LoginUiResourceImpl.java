@@ -141,7 +141,9 @@ public class LoginUiResourceImpl implements LoginUiResource {
         }
 
         TUser result = userRepository.save(user);
-        tRoleUserRepository.saveAll(tRoleUsers);
+        tRoleUsers = tRoleUserRepository.saveAll(tRoleUsers);
+
+        result.setLgRole(tRoleUsers);
         return result;
     }
 }

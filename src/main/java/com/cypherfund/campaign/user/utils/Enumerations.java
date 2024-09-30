@@ -17,6 +17,6 @@ public class Enumerations {
     }
 
     public enum SOCIAL_MEDIA_PLATFORM {
-        tiktok, instagram, facebook, twitter, youtube, x, github
+        tiktok, instagram, facebook, twitter, youtube, x, github, google
     }
 }

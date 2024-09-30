@@ -14,8 +14,6 @@ import java.util.List;
 public interface TiktokLoginUiResource {
     @GetMapping("/authorize/tiktok")
     ResponseEntity initiateTiktokLogin(HttpServletResponse response,
-                                       @RequestParam String username,
-                                       @RequestParam String email,
                                        @RequestParam(required = false) String redirectUrl);
 
     @GetMapping("/callback/tiktok")

@@ -75,8 +75,6 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
-                                                                         String username,
-                                                                         String email,
                                                                          String redirectUrl) {
         // Generate CSRF state token
         String csrfState = UUID.randomUUID().toString();
@@ -88,8 +86,6 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         response.addCookie(csrfCookie);
 
         SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setEmail(email);
-        signUpRequest.setUsername(username);
         signUpRequest.setRedirectUrl(redirectUrl);
 
         redisTemplate.opsForValue().set("TEMP:LOGIN:TIKTOK:"+csrfState, signUpRequest);
@@ -114,81 +110,89 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
     @Override
     @SneakyThrows
     public ResponseEntity<JwtAuthenticationResponse> completeTiktokLogin(String code, String state, String scopes, String error, String errorDescription, String csrfState) {
-        if (error != null) {
-            log.error("Error: " + error + ", Description: " + errorDescription);
+        try {
+            if (error != null) {
+                log.error("Error: " + error + ", Description: " + errorDescription);
+            }
+
+            SignUpRequest signUpRequest = (SignUpRequest) redisTemplate.opsForValue().get("TEMP:LOGIN:TIKTOK:"+state);
+            log.info("Sign up request: " + signUpRequest);
+
+            if (code == null) {
+                log.error("Authorization code not found");
+                return null;
+            }
+
+            if (signUpRequest == null) {
+                log.error("Sign up request not found");
+                return null;
+            }
+
+            TiktokTokenResponse response = getToken(code);
+
+            if (response == null || response.getAccess_token() == null) {
+                log.error("Failed to get access token {}", response);
+                return null;
+            }
+
+            redisTemplate.delete("TEMP:LOGIN:TIKTOK:"+state);
+
+            // Save access token to database
+            log.info("Access token: " + response);
+            TiktokUserResponse tiktokUserResponse = getUserInfo(response.getAccess_token());
+            log.info("User info: " + tiktokUserResponse);
+
+            Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUsername(), tiktok);
+            //if a profile exist with this user simply log the user in
+            if (profileOptional.isPresent()) {
+                String userId = profileOptional.get().getUser().getUserId();
+                createTiktokLogin(response, userId);
+                log.info("User already exists, logging in");
+
+                cacheUserToken(response.getAccess_token(), userId, response.getExpires_in());
+
+                ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
+
+                return redirectUserIfRedirectUrlPresent(signUpRequest.getRedirectUrl(), loginResponse);
+            }
+
+            String password = tiktokUserResponse.getData().getUser().getUsername();
+            String username = "@" + tiktokUserResponse.getData().getUser().getUsername();
+            String email = tiktokUserResponse.getData().getUser().getUsername() + "@tiktok.com";
+
+            signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
+            signUpRequest.setPassword(password);
+            log.info("image url: , image length" + tiktokUserResponse.getData().getUser().getAvatar_url(), tiktokUserResponse.getData().getUser().getAvatar_url().length());
+            log.info("display name: " + tiktokUserResponse.getData().getUser().getDisplay_name());
+            signUpRequest.setImageUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
+
+            signUpRequest.setEmail(email);
+            signUpRequest.setUsername(username);
+            //if use already exist in the system, just create another profile for the user
+            Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmail(username, email);
+
+            TUser user = userOptional.orElse(loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok));
+
+            TProfile profile = new TProfile();
+            profile.setSocialMediaAccount(tiktok);
+            profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
+            profile.setAccountId(tiktokUserResponse.getData().getUser().getUsername());
+            profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
+            profile.setUser(user);
+            profile.setDtCreatedAt(Instant.now());
+            profileRepository.save(profile);
+
+            createTiktokLogin(response, user.getUserId());
+            cacheUserToken(response.getAccess_token(), user.getUserId(), response.getExpires_in());
+
+
+            ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
+
+            return redirectUserIfRedirectUrlPresent(signUpRequest.getRedirectUrl(), loginResponse);
+
+        } catch (Exception e) {
+            return redirectUserIfRedirectUrlPresent("", null);
         }
-
-        SignUpRequest signUpRequest = (SignUpRequest) redisTemplate.opsForValue().get("TEMP:LOGIN:TIKTOK:"+state);
-        log.info("Sign up request: " + signUpRequest);
-
-        if (code == null) {
-            log.error("Authorization code not found");
-            return null;
-        }
-
-        if (signUpRequest == null) {
-            log.error("Sign up request not found");
-            return null;
-        }
-
-        TiktokTokenResponse response = getToken(code);
-
-        if (response == null || response.getAccess_token() == null) {
-            log.error("Failed to get access token {}", response);
-            return null;
-        }
-
-        redisTemplate.delete("TEMP:LOGIN:TIKTOK:"+state);
-
-        // Save access token to database
-        log.info("Access token: " + response);
-        TiktokUserResponse tiktokUserResponse = getUserInfo(response.getAccess_token());
-        log.info("User info: " + tiktokUserResponse);
-
-        Optional<TProfile> profileOptional = profileRepository.findByAccountIdAndSocialMediaAccount(tiktokUserResponse.getData().getUser().getUnion_id(), tiktok);
-        //if a profile exist with this user simply log the user in
-        if (profileOptional.isPresent()) {
-            String userId = profileOptional.get().getUser().getUserId();
-            createTiktokLogin(response, userId);
-            log.info("User already exists, logging in");
-
-            cacheUserToken(response.getAccess_token(), userId, response.getExpires_in());
-
-            ResponseEntity<JwtAuthenticationResponse> loginResponse = loginUser(profileOptional.get());
-
-            return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
-        }
-
-        signUpRequest.setRoles(Collections.singletonList("CUSTOMER"));
-        signUpRequest.setPassword(signUpRequest.getUsername());
-        log.info("image url: , image length" + tiktokUserResponse.getData().getUser().getAvatar_url(), tiktokUserResponse.getData().getUser().getAvatar_url().length());
-        log.info("display name: " + tiktokUserResponse.getData().getUser().getDisplay_name());
-        signUpRequest.setImageUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
-
-        signUpRequest.setEmail(signUpRequest.getEmail() == null ? "": signUpRequest.getEmail());
-        signUpRequest.setPhone(signUpRequest.getPhone() == null ? "": signUpRequest.getPhone());
-        signUpRequest.setUsername(signUpRequest.getUsername() == null ? "": signUpRequest.getUsername());
-        //if use already exist in the system, just create another profile for the user
-        Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmailOrPhone(signUpRequest.getUsername(), signUpRequest.getEmail(), signUpRequest.getPhone());
-
-        TUser user = userOptional.orElse(loginUiResourceImpl.createUser(signUpRequest, Enumerations.AUTH_PRIVIDERS.tiktok));
-
-        TProfile profile = new TProfile();
-        profile.setSocialMediaAccount(tiktok);
-        profile.setAccountName(tiktokUserResponse.getData().getUser().getDisplay_name());
-        profile.setAccountId(tiktokUserResponse.getData().getUser().getUnion_id());
-        profile.setImgUrl(tiktokUserResponse.getData().getUser().getAvatar_url());
-        profile.setUser(user);
-        profile.setDtCreatedAt(Instant.now());
-        profileRepository.save(profile);
-
-        createTiktokLogin(response, user.getUserId());
-        cacheUserToken(response.getAccess_token(), user.getUserId(), response.getExpires_in());
-
-
-        ResponseEntity<JwtAuthenticationResponse> loginResponse =  loginUser(profile);
-
-        return redirectUserIfRedirectUrlPresent(signUpRequest, loginResponse);
 
     }
 
@@ -197,10 +201,9 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
         redisTemplate.expire("TIKTOK:TOKEN:"+ userId, expiresIn, TimeUnit.SECONDS);
     }
 
-    private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(SignUpRequest signUpRequest, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
-        if (signUpRequest.getRedirectUrl() != null) {
-            log.info("Redirecting user to: " + signUpRequest.getRedirectUrl());
-            String redirectUrl = signUpRequest.getRedirectUrl();
+    private ResponseEntity<JwtAuthenticationResponse> redirectUserIfRedirectUrlPresent(String redirectUrl, ResponseEntity<JwtAuthenticationResponse> loginResponse) {
+        if (redirectUrl != null) {
+            log.info("Redirecting user to: " + redirectUrl);
             if (loginResponse.getBody() != null && !StringUtils.isBlank(loginResponse.getBody().getAccessToken())) {
                 redirectUrl = redirectUrl + "?token=" + loginResponse.getBody().getAccessToken();
             }
