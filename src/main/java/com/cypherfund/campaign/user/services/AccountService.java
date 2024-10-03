@@ -146,10 +146,16 @@ public class AccountService {
 
         parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
 
+        new Thread(() -> sendPaymentNotification(callbackResponse, trace, isPaymentSuccessful)).start();
+
         if (!StringUtils.isBlank(trace.getCallbackUrl())) {
             //execute in another thread
             new Thread(() -> sendCallback(callbackResponse, trace, isPaymentSuccessful)).start();
         }
+    }
+
+    private void sendPaymentNotification(CallbackResponse callbackResponse, TTrace trace, boolean isPaymentSuccessful) {
+        SendNoti
     }
 
     @Transactional
