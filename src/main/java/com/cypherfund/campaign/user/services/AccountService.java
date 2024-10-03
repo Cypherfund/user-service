@@ -2,12 +2,14 @@ package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.dal.entity.*;
 import com.cypherfund.campaign.user.dal.repository.*;
+import com.cypherfund.campaign.user.dto.SendNotificationDto;
 import com.cypherfund.campaign.user.dto.TAccountBalanceDto;
 import com.cypherfund.campaign.user.exceptions.AppException;
 import com.cypherfund.campaign.user.model.payment.CallbackResponse;
 import com.cypherfund.campaign.user.model.payment.DebitRequest;
 import com.cypherfund.campaign.user.model.payment.PaymentResponse;
 import com.cypherfund.campaign.user.model.payment.RechargeRequest;
+import com.cypherfund.campaign.user.proxies.NotificationFeignClient;
 import com.cypherfund.campaign.user.security.UserPrincipal;
 import com.cypherfund.campaign.user.services.paymentProcess.IPaymentProcess;
 import com.cypherfund.campaign.user.utils.Enumerations;
@@ -16,8 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -51,6 +55,8 @@ public class AccountService {
     private final Map<Enumerations.PaymentMethod, IPaymentProcess> paymentProcesses;
     private final CoinService coinService;
     private final RestTemplate restTemplate;
+
+    private final NotificationFeignClient notificationFeignClient;
 
 
     @Transactional
@@ -144,9 +150,10 @@ public class AccountService {
 
         boolean isPaymentSuccessful = callbackResponse.getStatus().equalsIgnoreCase(SUCCESS.name());
 
-        parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
+        //ensure that the method is called from a proxy
+        ((AccountService) AopContext.currentProxy()).parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
 
-        new Thread(() -> sendPaymentNotification(callbackResponse, trace, isPaymentSuccessful)).start();
+        new Thread(() -> sendPaymentNotification(trace, isPaymentSuccessful)).start();
 
         if (!StringUtils.isBlank(trace.getCallbackUrl())) {
             //execute in another thread
@@ -154,8 +161,23 @@ public class AccountService {
         }
     }
 
-    private void sendPaymentNotification(CallbackResponse callbackResponse, TTrace trace, boolean isPaymentSuccessful) {
-        SendNoti
+    private void sendPaymentNotification(TTrace trace, boolean isPaymentSuccessful) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("status", isPaymentSuccessful ? SUCCESS.name() : FAILED.name());
+            jsonObject.put("transactionId", trace.getLgTraceId());
+            jsonObject.put("message", isPaymentSuccessful ? "Payment successful" : "Payment failed");
+
+            SendNotificationDto sendNotificationDto = SendNotificationDto.builder()
+                    .message(jsonObject.toString())
+                    .title("")
+                    .channel("REALTIME")
+                    .destination(new String[]{"/topic/payment-status/" + trace.getLgUserId()})
+                    .build();
+            notificationFeignClient.sendEmailNotification(sendNotificationDto);
+        } catch (Exception ex) {
+            log.error("error sending notification for internation account {}", ex.getMessage());
+        }
     }
 
     @Transactional

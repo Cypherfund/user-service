@@ -11,5 +11,5 @@ public class SendNotificationDto {
     private String imageUrl;
     private String type;
     private String channel;
-    private String[] emailRecipients;
+    private String[] destination;
 }
