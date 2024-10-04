@@ -167,7 +167,7 @@ public class AccountService {
             jsonObject.put("transactionId", trace.getLgTraceId());
             jsonObject.put("message", isPaymentSuccessful ? "Payment successful" : "Payment failed");
 
-            log.info("Sending notification for payment {} for user {}", jsonObject, trace.getLgUserId());
+            log.info("Sending notification for payment {} for user {} ", jsonObject, trace.getLgUserId());
 
             SendNotificationDto sendNotificationDto = SendNotificationDto.builder()
                     .message(jsonObject.toString())
