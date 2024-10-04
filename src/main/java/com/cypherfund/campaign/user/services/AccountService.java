@@ -150,8 +150,7 @@ public class AccountService {
 
         boolean isPaymentSuccessful = callbackResponse.getStatus().equalsIgnoreCase(SUCCESS.name());
 
-        //ensure that the method is called from a proxy
-        ((AccountService) AopContext.currentProxy()).parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
+        parseCallbackResponse(callbackResponse, trace, isPaymentSuccessful);
 
         new Thread(() -> sendPaymentNotification(trace, isPaymentSuccessful)).start();
 
@@ -167,6 +166,8 @@ public class AccountService {
             jsonObject.put("status", isPaymentSuccessful ? SUCCESS.name() : FAILED.name());
             jsonObject.put("transactionId", trace.getLgTraceId());
             jsonObject.put("message", isPaymentSuccessful ? "Payment successful" : "Payment failed");
+
+            log.info("Sending notification for payment {} for user {}", jsonObject, trace.getLgUserId());
 
             SendNotificationDto sendNotificationDto = SendNotificationDto.builder()
                     .message(jsonObject.toString())
