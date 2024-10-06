@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.cypherfund.campaign.user.utils.Enumerations.NOTIFICATION_TYPE.PAYMENT;
 import static com.cypherfund.campaign.user.utils.Enumerations.PAYMENT_STATUS.*;
 import static com.cypherfund.campaign.user.utils.Enumerations.TRANSACTION_TYPE.*;
 
@@ -166,6 +167,7 @@ public class AccountService {
             jsonObject.put("status", isPaymentSuccessful ? SUCCESS.name() : FAILED.name());
             jsonObject.put("transactionId", trace.getLgTraceId());
             jsonObject.put("message", isPaymentSuccessful ? "Payment successful" : "Payment failed");
+            jsonObject.put("type", PAYMENT.name());
 
             SendNotificationDto sendNotificationDto = SendNotificationDto.builder()
                     .message(jsonObject.toString())

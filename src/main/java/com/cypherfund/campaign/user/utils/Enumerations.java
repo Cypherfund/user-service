@@ -19,4 +19,8 @@ public class Enumerations {
     public enum SOCIAL_MEDIA_PLATFORM {
         tiktok, instagram, facebook, twitter, youtube, x, github, google
     }
+
+    public enum NOTIFICATION_TYPE {
+        PAYMENT, TASK, CAMPAIGN, USER, SYSTEM, COIN, OFFER, PACKAGE, WALLET, TRANSACTION, PROFILE, NOTIFICATION
+    }
 }
