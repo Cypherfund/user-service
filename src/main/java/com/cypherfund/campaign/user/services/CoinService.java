@@ -52,6 +52,7 @@ public class CoinService {
             newAccountBalance.setDWinBalance(BigDecimal.ZERO);
             newAccountBalance.setDbCoinBalance(BigDecimal.ZERO);
             newAccountBalance.setDtCreated(Instant.now());
+            newAccountBalance.setDtUpdated(Instant.now());
             return tAccountBalanceRepository.save(newAccountBalance);
         });
 
@@ -59,6 +60,7 @@ public class CoinService {
             accountBalance.setDbCoinBalance(BigDecimal.ZERO);
 
         accountBalance.setDbCoinBalance(accountBalance.getDbCoinBalance().add(BigDecimal.valueOf(amount)));
+        accountBalance.setDtUpdated(Instant.now());
 
         tAccountBalanceRepository.save(accountBalance);
 
