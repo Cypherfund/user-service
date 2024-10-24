@@ -26,6 +26,7 @@ public class UserUiResourceImpl implements UserUiResource {
     final TUserRepository userRepository;
     final JwtTokenProvider tokenProvider;
     final TProfileRepository profileRepository;
+    final ReferralCodeService referralCodeService;
 
     @Override
     public ResponseEntity<ApiResponse<List<TUserDto>>> getAllUsers(int page, int limit) {
@@ -75,6 +76,12 @@ public class UserUiResourceImpl implements UserUiResource {
                 .map((element) -> modelMapper.map(element, TProfileDto.class))
                 .toList();
         return ResponseEntity.ok(new ApiResponse<>(true, "", profileDto));
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse<String>> getUserReferralCode(String userId) {
+        String referralCode = referralCodeService.getReferralCode(userId);
+        return ResponseEntity.ok(new ApiResponse<>(true, "generated referral code", referralCode));
     }
 
     private TUserDto mapToUserDto(TUser user) {

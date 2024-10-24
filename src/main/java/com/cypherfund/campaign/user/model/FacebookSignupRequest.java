@@ -11,4 +11,5 @@ public class FacebookSignupRequest {
     private String phone;
     private String password;
     private String imageUrl;
+    private String referrer;
 }

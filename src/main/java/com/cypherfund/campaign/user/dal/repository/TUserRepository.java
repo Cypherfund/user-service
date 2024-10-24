@@ -12,5 +12,6 @@ public interface TUserRepository extends JpaRepository<TUser, String> {
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
     boolean existsByPhoneOrEmailOrUsername(String username, String email, String phone);
+    boolean existsByReferralCode(String referrer);
     Optional<TUser> findByEmail(String email);
 }

@@ -31,4 +31,7 @@ public interface UserUiResource {
     //get user profiles
     @GetMapping("/profiles/{userId}")
     ResponseEntity<ApiResponse<List<TProfileDto>>> getUserProfiles(@PathVariable String userId);
+
+    @GetMapping("/{userId}/referrer-code")
+    ResponseEntity<ApiResponse<String>> getUserReferralCode(@PathVariable String userId);
 }

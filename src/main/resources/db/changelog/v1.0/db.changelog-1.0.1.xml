@@ -127,5 +127,13 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="add referred column to user" author="Ngai Elizabeth">
+        <addColumn tableName="t_users">
+            <column name="referrer" type="varchar(5)"/>
+        </addColumn>
+        <addColumn tableName="t_users">
+            <column name="referral_code" type="varchar(5)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
 

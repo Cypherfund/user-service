@@ -71,4 +71,12 @@ public class TUser implements Serializable {
     @Column(name = "img_url")
     private String imgUrl;
 
+    @Size(max = 10)
+    @Column(name = "referrer", length = 10)
+    private String referrer;
+
+    @Size(max = 5)
+    @Column(name = "referral_code", length = 5)
+    private String referralCode;
+
 }
