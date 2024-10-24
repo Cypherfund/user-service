@@ -71,9 +71,10 @@ public class AccountUiResource {
     }
 
     @GetMapping("/transactions/{userId}")
-    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactions(@PathVariable String userId) {
+    public ResponseEntity<ApiResponse<List<Transaction>>> getTransactions(@PathVariable String userId,
+                                                                          @RequestParam(required = false) String ref) {
         log.info("Retrieving transactions for user: {}", userId);
-        return ResponseEntity.ok(ApiResponse.success("Transactions retrieved successfully", accountService.getTransactions(userId)));
+        return ResponseEntity.ok(ApiResponse.success("Transactions retrieved successfully", accountService.getTransactions(userId, ref)));
     }
 
 }

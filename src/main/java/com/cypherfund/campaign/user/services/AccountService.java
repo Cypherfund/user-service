@@ -319,8 +319,11 @@ public class AccountService {
         return tAccountBalanceRepository.save(newAccountBalance);
     }
 
-    public List<Transaction> getTransactions(String userId) {
+    public List<Transaction> getTransactions(String userId, String reference) {
         log.info("Retrieving transactions for user: {}", userId);
+        if (!StringUtils.isBlank(reference))
+            return transactionRepository.findByReferenceAndUserId(reference, userId);
+
         return transactionRepository.findByUserId(userId);
     }
 
