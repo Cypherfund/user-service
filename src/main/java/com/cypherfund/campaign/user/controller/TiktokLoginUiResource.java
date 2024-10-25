@@ -14,7 +14,8 @@ import java.util.List;
 public interface TiktokLoginUiResource {
     @GetMapping("/authorize/tiktok")
     ResponseEntity initiateTiktokLogin(HttpServletResponse response,
-                                       @RequestParam(required = false) String redirectUrl);
+                                       @RequestParam(required = false) String redirectUrl,
+                                       @RequestParam(required = false) String referralCode);
 
     @GetMapping("/callback/tiktok")
     ResponseEntity<JwtAuthenticationResponse> completeTiktokLogin(@RequestParam(value = "code", required = false) String code,

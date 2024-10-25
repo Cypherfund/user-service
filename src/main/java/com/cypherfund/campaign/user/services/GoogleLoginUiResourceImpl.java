@@ -71,6 +71,7 @@ public class GoogleLoginUiResourceImpl implements GoogleLoginUiResource {
 
             signUpRequest.setEmail(email);
             signUpRequest.setUsername(username);
+            signUpRequest.setReferrer(body.getReferrer());
 
             //if user already exists in the system, just create another profile for the user
             Optional<TUser> userOptional = userRepository.findFirstByUsernameOrEmail(username, email);

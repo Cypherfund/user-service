@@ -75,7 +75,8 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
     @Override
     public ResponseEntity<JwtAuthenticationResponse> initiateTiktokLogin(HttpServletResponse response,
-                                                                         String redirectUrl) {
+                                                                         String redirectUrl,
+                                                                         String referralCode) {
         // Generate CSRF state token
         String csrfState = UUID.randomUUID().toString();
         Cookie csrfCookie = new Cookie("csrfState", csrfState);
@@ -87,6 +88,7 @@ public class TiktokLoginUiResourceImpl implements TiktokLoginUiResource {
 
         SignUpRequest signUpRequest = new SignUpRequest();
         signUpRequest.setRedirectUrl(redirectUrl);
+        signUpRequest.setReferrer(referralCode);
 
         redisTemplate.opsForValue().set("TEMP:LOGIN:TIKTOK:"+csrfState, signUpRequest);
         redisTemplate.expire("TEMP:LOGIN:TIKTOK:"+csrfState, 600, TimeUnit.SECONDS);
