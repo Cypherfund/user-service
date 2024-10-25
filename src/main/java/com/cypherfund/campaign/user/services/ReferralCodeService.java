@@ -10,9 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Author: E.Ngai
@@ -41,9 +41,9 @@ public class ReferralCodeService {
         List<ReferredUser> referredUsers = userRepository.getReferralData(user.getReferralCode())
                 .stream()
                 .map(d -> ReferredUser.builder()
-                        .completed((Long) d[1] > 1000)
+                        .completed(((BigDecimal) d[1]).compareTo(BigDecimal.valueOf(1000)) >= 0)
                         .username((String) d[0])
-                        .taskCount(((Long) d[1]).intValue())
+                        .coins((BigDecimal) d[1])
                         .build())
                 .toList();
         userReferralData.setReferredUsers(referredUsers);

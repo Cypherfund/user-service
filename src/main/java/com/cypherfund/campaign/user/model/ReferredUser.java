@@ -3,6 +3,8 @@ package com.cypherfund.campaign.user.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * Author: E.Ngai
  * Date: 10/25/2024
@@ -13,5 +15,5 @@ import lombok.Data;
 public class ReferredUser {
     private String username;
     private boolean completed;
-    private int taskCount;
+    private BigDecimal coins;
 }
