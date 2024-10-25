@@ -3,6 +3,7 @@ package com.cypherfund.campaign.user.dal.repository;
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,8 +28,8 @@ public interface TUserRepository extends JpaRepository<TUser, String> {
             "    transactions t ON u.user_id = t.user_id" +
             "        AND t.type = 'COIN_REWARD'" +
             "WHERE" +
-            "        u.referrer = ?1" +
+            "        u.referrer = :referralCode" +
             "GROUP BY" +
             "    u.user_id", nativeQuery = true)
-    List<Object[]> getReferralData(String referralCode);
+    List<Object[]> getReferralData(@Param("referralCode") String referralCode);
 }
