@@ -12,6 +12,10 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Author: E.Ngai
  * Date: 6/21/2024
@@ -39,8 +43,16 @@ public class RedisConfig {
         RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
+
+        // Specific cache configurations
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+        // Set 24-hour expiration for the referralCode cache
+        cacheConfigurations.put("referralCode", cacheConfig.entryTtl(Duration.ofHours(24)));
+
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(cacheConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
 }
