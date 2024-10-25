@@ -21,15 +21,15 @@ public interface TUserRepository extends JpaRepository<TUser, String> {
 
     @Query(value = "SELECT" +
             "    u.username," +
-            "    COALESCE(SUM(t.amount), 0) AS total_points" +
+            "    COALESCE(SUM(t.amount), 0) AS total_points " +
             "FROM" +
             "    t_users u" +
             "        LEFT JOIN" +
             "    transactions t ON u.user_id = t.user_id" +
             "        AND t.type = 'COIN_REWARD'" +
             "WHERE" +
-            "        u.referrer = :referralCode" +
+            "        u.referrer = ?1 " +
             "GROUP BY" +
             "    u.user_id", nativeQuery = true)
-    List<Object[]> getReferralData(@Param("referralCode") String referralCode);
+    List<Object[]> getReferralData(String referralCode);
 }
