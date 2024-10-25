@@ -2,6 +2,7 @@ package com.cypherfund.campaign.user.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
  **/
 @Builder
 @Data
+@NoArgsConstructor
 public class ReferredUser {
     private String username;
     private boolean completed;

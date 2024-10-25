@@ -1,6 +1,7 @@
 package com.cypherfund.campaign.user.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  **/
 
 @Data
+@NoArgsConstructor
 public class UserReferralData {
     private String referralCode;
     private String referralLink;
