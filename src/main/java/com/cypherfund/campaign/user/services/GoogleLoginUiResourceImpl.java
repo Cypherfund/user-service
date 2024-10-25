@@ -58,7 +58,7 @@ public class GoogleLoginUiResourceImpl implements GoogleLoginUiResource {
             }
 
             String password = body.getUsername();
-            String username = "@" + body.getUsername();
+            String username = "@" + body.getUsername().split("@")[0];
             String email = body.getEmail();
 
             SignUpRequest signUpRequest = new SignUpRequest();

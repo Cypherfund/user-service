@@ -2,11 +2,17 @@ package com.cypherfund.campaign.user.services;
 
 import com.cypherfund.campaign.user.dal.entity.TUser;
 import com.cypherfund.campaign.user.dal.repository.TUserRepository;
+import com.cypherfund.campaign.user.exceptions.NotFoundException;
+import com.cypherfund.campaign.user.model.ReferredUser;
+import com.cypherfund.campaign.user.model.UserReferralData;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Author: E.Ngai
@@ -24,6 +30,26 @@ public class ReferralCodeService {
     private final SecureRandom random = new SecureRandom();
 
     private final TUserRepository userRepository;
+
+    @Cacheable(value = "referralCode", key = "#userId")
+    public UserReferralData getUserReferralData(String userId) {
+        TUser user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
+        UserReferralData userReferralData = new UserReferralData();
+        userReferralData.setReferralCode(getReferralCode(userId));
+        userReferralData.setReferralLink("https://auth.task.tech-ascend.com?referral_code=" + user.getReferralCode());
+
+        List<ReferredUser> referredUsers = userRepository.getReferralData(user.getReferralCode())
+                .stream()
+                .map(d -> ReferredUser.builder()
+                        .completed((Long) d[1] > 1000)
+                        .username((String) d[0])
+                        .taskCount(((Long) d[1]).intValue())
+                        .build())
+                .toList();
+        userReferralData.setReferredUsers(referredUsers);
+
+        return userReferralData;
+    }
 
     public String getReferralCode(String userId) {
         TUser user = userRepository.findById(userId).orElseThrow();

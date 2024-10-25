@@ -5,6 +5,7 @@ import com.cypherfund.campaign.user.model.ApiResponse;
 import com.cypherfund.campaign.user.model.payment.DebitRequest;
 import com.cypherfund.campaign.user.model.payment.RechargeCoinRequest;
 import com.cypherfund.campaign.user.services.CoinService;
+import com.cypherfund.campaign.user.utils.Enumerations;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,10 @@ public class CoinAccountUiResource {
     public ResponseEntity<ApiResponse<TAccountBalanceDto>> creditWinning(
                                 @RequestParam("amount") double amount,
                                 @RequestParam("userId") String userId,
+                                @RequestParam(value = "userId", defaultValue = "COIN_REWARD") Enumerations.TRANSACTION_TYPE type,
                                 @RequestParam("reference") String reference) {
         log.info("Crediting coin balance for user: {}", userId);
-        TAccountBalanceDto accountBalanceDto = coinService.coinReward( userId, amount, reference);
+        TAccountBalanceDto accountBalanceDto = coinService.coinReward( userId, amount, type, reference);
         return ResponseEntity.ok(ApiResponse.success("Winning credited successfully", accountBalanceDto));
     }
 

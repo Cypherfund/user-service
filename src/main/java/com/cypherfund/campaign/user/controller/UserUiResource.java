@@ -2,6 +2,7 @@ package com.cypherfund.campaign.user.controller;
 
 import com.cypherfund.campaign.user.dto.TProfileDto;
 import com.cypherfund.campaign.user.model.ApiResponse;
+import com.cypherfund.campaign.user.model.UserReferralData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,5 +34,5 @@ public interface UserUiResource {
     ResponseEntity<ApiResponse<List<TProfileDto>>> getUserProfiles(@PathVariable String userId);
 
     @GetMapping("/{userId}/referrer-code")
-    ResponseEntity<ApiResponse<String>> getUserReferralCode(@PathVariable String userId);
+    ResponseEntity<ApiResponse<UserReferralData>> getUserReferralCode(@PathVariable String userId);
 }

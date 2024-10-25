@@ -9,6 +9,7 @@ import com.cypherfund.campaign.user.dto.TProfileDto;
 import com.cypherfund.campaign.user.dto.TUserDto;
 import com.cypherfund.campaign.user.exceptions.NotFoundException;
 import com.cypherfund.campaign.user.model.ApiResponse;
+import com.cypherfund.campaign.user.model.UserReferralData;
 import com.cypherfund.campaign.user.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,8 +80,8 @@ public class UserUiResourceImpl implements UserUiResource {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<String>> getUserReferralCode(String userId) {
-        String referralCode = referralCodeService.getReferralCode(userId);
+    public ResponseEntity<ApiResponse<UserReferralData>> getUserReferralCode(String userId) {
+        UserReferralData referralCode = referralCodeService.getUserReferralData(userId);
         return ResponseEntity.ok(new ApiResponse<>(true, "generated referral code", referralCode));
     }
 

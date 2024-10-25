@@ -41,7 +41,7 @@ public class CoinService {
     private final Map<Enumerations.PaymentMethod, IPaymentProcess> paymentProcesses;
 
     @Transactional
-    public TAccountBalanceDto coinReward(String userId, double amount, String reference) {
+    public TAccountBalanceDto coinReward(String userId, double amount, Enumerations.TRANSACTION_TYPE type, String reference) {
         log.info("Rewarding coin balance for user: {}", userId);
 
         TUser user = tUserRepository.findById(userId).orElseThrow(() -> new AppException("User not found"));
@@ -64,7 +64,7 @@ public class CoinService {
 
         tAccountBalanceRepository.save(accountBalance);
 
-        createTransaction(userId, COIN_REWARD, amount, reference);
+        createTransaction(userId, type, amount, reference);
 
         return modelMapper.map(accountBalance, TAccountBalanceDto.class);
     }
