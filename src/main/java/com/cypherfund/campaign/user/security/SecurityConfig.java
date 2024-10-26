@@ -47,7 +47,6 @@ public class SecurityConfig {
             "/account/callback",
             "/account/play",
             "/account/winning",
-            "/coin/**",
 
     };
     private final String[] permittedGets = new String[]{

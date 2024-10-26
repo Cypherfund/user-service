@@ -37,14 +37,9 @@ public class ReferralCodeService {
         UserReferralData userReferralData = new UserReferralData();
         userReferralData.setReferralCode(getReferralCode(userId));
         userReferralData.setReferralLink("https://auth.task.tech-ascend.com?referral_code=" + user.getReferralCode());
-
         List<ReferredUser> referredUsers = userRepository.getReferralData(user.getReferralCode())
                 .stream()
-                .map(d -> ReferredUser.builder()
-                        .completed(((BigDecimal) d[1]).compareTo(BigDecimal.valueOf(1000)) >= 0)
-                        .username((String) d[0])
-                        .coins((BigDecimal) d[1])
-                        .build())
+                .map(d -> new ReferredUser((String) d[0], ((BigDecimal) d[1]).compareTo(BigDecimal.valueOf(1000)) >= 0, ((BigDecimal) d[1]).intValue()  ))
                 .toList();
         userReferralData.setReferredUsers(referredUsers);
 
