@@ -135,5 +135,11 @@
             <column name="referral_code" type="varchar(5)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="add-referral-reward-to-transaction-type" author="Ngai Elizabeth">
+        <sql>
+            ALTER TABLE transactions MODIFY COLUMN type ENUM('BB_BET', 'BB_WINNING', 'WITHDRAWAL', 'DEPOSIT', 'SUBSCRIPTION', 'COIN_PURCHASE', 'COIN_REWARD', 'COIN_DEBIT', 'REFERRAL_REWARD');
+        </sql>
+    </changeSet>
 </databaseChangeLog>
 

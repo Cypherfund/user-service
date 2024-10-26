@@ -15,5 +15,6 @@ import lombok.NoArgsConstructor;
 public class ReferredUser {
     private String username;
     private boolean completed;
+    private boolean collected;
     private int coins;
 }

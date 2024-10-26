@@ -10,4 +10,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     List<Transaction> findByUserId(String userId);
 
     List<Transaction> findByReferenceAndUserId(String reference, String userId);
+
+    boolean existsByReferenceAndType(String reference, String type);
 }

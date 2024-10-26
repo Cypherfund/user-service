@@ -21,6 +21,7 @@ public interface TUserRepository extends JpaRepository<TUser, String> {
 
     @Query(value = "SELECT" +
             "    u.username," +
+            "    u.user_id," +
             "    COALESCE(SUM(t.amount), 0) AS total_points " +
             "FROM" +
             "    t_users u" +
