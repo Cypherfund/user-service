@@ -17,4 +17,5 @@ public class ReferredUser {
     private boolean completed;
     private boolean collected;
     private int coins;
+    private String userId;
 }
