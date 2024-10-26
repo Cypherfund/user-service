@@ -23,7 +23,7 @@ public class CoinAccountUiResource {
     public ResponseEntity<ApiResponse<TAccountBalanceDto>> creditWinning(
                                 @RequestParam("amount") double amount,
                                 @RequestParam("userId") String userId,
-                                @RequestParam(value = "userId", defaultValue = "COIN_REWARD") Enumerations.TRANSACTION_TYPE type,
+                                @RequestParam(value = "type", defaultValue = "COIN_REWARD") Enumerations.TRANSACTION_TYPE type,
                                 @RequestParam("reference") String reference) {
         log.info("Crediting coin balance for user: {}", userId);
         TAccountBalanceDto accountBalanceDto = coinService.coinReward( userId, amount, type, reference);
