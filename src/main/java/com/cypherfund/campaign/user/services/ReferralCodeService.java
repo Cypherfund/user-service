@@ -47,7 +47,7 @@ public class ReferralCodeService {
                     ReferredUser referredUser = new ReferredUser();
                     referredUser.setUsername((String) d[0]);
                     referredUser.setCompleted(((BigDecimal) d[2]).compareTo(BigDecimal.valueOf(1000)) >= 0);
-                    referredUser.setCollected(transactionRepository.existsByReferenceAndType((String) d[1], REFERRAL_REWARD.name()));
+                    referredUser.setCollected(transactionRepository.existsByReferenceAndType((String) d[1], REFERRAL_REWARD));
                     referredUser.setCoins(((BigDecimal) d[1]).intValue());
                     return referredUser;
                 })
