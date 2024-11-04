@@ -40,7 +40,7 @@ public class ReferralCodeService {
         TUser user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         UserReferralData userReferralData = new UserReferralData();
         userReferralData.setReferralCode(getReferralCode(userId));
-        userReferralData.setReferralLink("https://auth.task.tech-ascend.com?referral_code=" + user.getReferralCode());
+        userReferralData.setReferralLink("https://viralsocialmediabooster.com?referral_code=" + user.getReferralCode());
         List<ReferredUser> referredUsers = userRepository.getReferralData(user.getReferralCode())
                 .stream()
                 .map(d -> {
