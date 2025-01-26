@@ -141,5 +141,9 @@
             ALTER TABLE transactions MODIFY COLUMN type ENUM('BB_BET', 'BB_WINNING', 'WITHDRAWAL', 'DEPOSIT', 'SUBSCRIPTION', 'COIN_PURCHASE', 'COIN_REWARD', 'COIN_DEBIT', 'REFERRAL_REWARD');
         </sql>
     </changeSet>
+
+    <changeSet id="make_str_originating_transaction_unique" author="Ngai Elizabeth">
+        <addUniqueConstraint tableName="t_trace" columnNames="str_originating_transaction" constraintName="idx_str_originating_transaction"/>
+    </changeSet>
 </databaseChangeLog>
 

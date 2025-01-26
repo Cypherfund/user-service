@@ -237,8 +237,6 @@ public class AccountService {
         } else {
             return Enumerations.PAYMENT_STATUS.PENDING.name();
         }
-
-
     }
 
     @Transactional
